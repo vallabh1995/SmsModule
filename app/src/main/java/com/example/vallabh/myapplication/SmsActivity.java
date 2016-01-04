@@ -16,7 +16,6 @@ import android.widget.Toast;
 import android.widget.Button;
 import java.util.ArrayList;
 
-//kkk
 public class SmsActivity extends AppCompatActivity implements OnItemClickListener {
 
     private static SmsActivity inst;
@@ -156,5 +155,4 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
             e.printStackTrace();
         }
     }
-
 }
