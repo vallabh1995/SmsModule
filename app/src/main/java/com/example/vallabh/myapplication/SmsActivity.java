@@ -115,13 +115,15 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
                smsMessage += smsMessages[i];
             }
 
+            //Status
             if(smsMessage.contains("credited")) {
                 smsMessageStr +="Credited";
             }
-            else if(smsMessage.contains("debited")) {
+            else if(smsMessage.contains("debited") || smsMessage.contains("withdraw")) {
                 smsMessageStr +="Debited";
             }
 
+            //AccountNumber
             if(smsMessage.contains("a/c no.")) {
                 a=smsMessage.indexOf("a/c");
                 b=smsMessage.indexOf(" ",a+8);
@@ -132,16 +134,27 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
                 b=smsMessage.indexOf(" ",a+4);
                 smsAccNo  += smsMessage.substring(a+4,b);
             }
+            else if(smsMessage.contains("account number")) {
+                a=smsMessage.indexOf("account");
+                b=smsMessage.indexOf(" ",a+15);
+                smsAccNo += smsMessage.substring(a+15,b);
+            }
             else if (smsMessage.contains("account")) {
                 a=smsMessage.indexOf("account");
                 b=smsMessage.indexOf(" ",a+8);
                 smsAccNo += smsMessage.substring(a+8,b);
             }
 
-            if(smsMessage.contains("rs")) {
-                a=smsMessage.indexOf("rs");
+            //Amount
+            if(smsMessage.contains("rs.")) {
+                a=smsMessage.indexOf("rs.");
                 b=smsMessage.indexOf(" ",a+4);
                 mAmount += smsMessage.substring(a+4,b);
+            }
+            else if(smsMessage.contains("rs")) {
+                a=smsMessage.indexOf("rs");
+                b=smsMessage.indexOf(" ",a+4);
+                mAmount += smsMessage.substring(a+3,b);
             }
             else if(smsMessage.contains("inr")) {
                 a=smsMessage.indexOf("inr");

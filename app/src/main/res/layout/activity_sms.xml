@@ -8,22 +8,32 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="SMS Inbox"
+        android:text="SMS Module"
         android:id="@+id/textView"
         android:layout_gravity="center_horizontal" />
 
-    <Button
+    <LinearLayout
+        android:id="@+id/top_buttons"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Messages"
-        android:id="@+id/messages" />
+        android:weightSum="2"
+        android:orientation="horizontal" >
 
-    <Button
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Database"
-        android:id="@+id/buttonDb" />
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Messages"
+            android:layout_weight="1"
+            android:id="@+id/messages" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Database"
+            android:layout_weight="1"
+            android:id="@+id/buttonDb" />
+
+    </LinearLayout>
 
 
     <ListView android:id="@+id/SMSList"
