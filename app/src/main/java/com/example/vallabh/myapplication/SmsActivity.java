@@ -1,6 +1,5 @@
 package com.example.vallabh.myapplication;
 
-import android.app.Activity;
 import android.content.ContentResolver;
 
 import android.database.Cursor;
@@ -27,6 +26,9 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
     String smsMessage = "", smsMessageStr = "", mAmount = "", smsAccNo = "", ReadAcc = "";;
     public static int NoBank = 12;
     public static String stringArray[] = {"8451043280", "VM-HDFCBK", "VM-BOIIND", "BP-SBIMBS", "BP-ATMSBI", "AM-HDFCBK", "VM-UnionB", "VM-UIICHO", "VM-CBSSBI", "VM-CorpBk", "VL-CENTBK", "VM-CENTBK", "BW-PNBSMS"};
+    public ArrayList<String> accountNumbers=new ArrayList<String>();
+    public int accountI=1;
+
 
     public static SmsActivity instance() {
         return inst;
@@ -42,6 +44,7 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sms);
+        accountNumbers.add("**16...337");
 
         /* Button for Database */
         Button But1 = (Button) findViewById(R.id.buttonDb);
@@ -71,11 +74,26 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
         But3.setOnClickListener(new AdapterView.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ReadAcc = mEdit.getText().toString();
-                ArrayList<String> Val = db.Selected(ReadAcc);
-                arrayAdapter.clear();
-                for (int i = 0; i < Val.size(); i++) {
-                    arrayAdapter.add(Val.get(i));
+                ReadAcc="";
+                ReadAcc += mEdit.getText().toString();
+
+                //For selected account number
+                if(ReadAcc!="") {
+                    ArrayList<String> Val = db.Selected(ReadAcc);
+                    arrayAdapter.clear();
+                    for (int i = 0; i < Val.size(); i++) {
+                        arrayAdapter.add(Val.get(i));
+                    }
+                }
+                //For all accounts in the string
+                else {
+                    arrayAdapter.clear();
+                    for(int j=0;j<accountI;j++){
+                        ArrayList<String> Val = db.Selected(accountNumbers.get(j));
+                        for (int i = 0; i < Val.size(); i++) {
+                            arrayAdapter.add(Val.get(i));
+                        }
+                    }
                 }
             }
         });
@@ -158,6 +176,19 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
                 a=smsMessage.indexOf("account");
                 b=smsMessage.indexOf(" ",a+8);
                 smsAccNo += smsMessage.substring(a+8,b);
+            }
+
+            int found=0;
+            String Temp="";
+            for(int i=0;i<accountI;i++) {
+                Temp=accountNumbers.get(i);
+                if(Temp.equalsIgnoreCase(smsAccNo))
+                { found=1; break;}
+            }
+
+            if(found!=1) {
+                accountNumbers.add(smsAccNo);
+                accountI++;
             }
 
             //Amount
