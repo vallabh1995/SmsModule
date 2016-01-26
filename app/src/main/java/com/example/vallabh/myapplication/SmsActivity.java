@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 import android.widget.Button;
@@ -23,9 +24,9 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
     ListView smsListView;
     ArrayAdapter arrayAdapter;
     final DatabaseHandler db = new DatabaseHandler(this);
-    String smsMessage = "", smsMessageStr= "", mAmount = "",smsAccNo = "";
-    public static int NoBank=12;
-    public static String stringArray[] = {"8451043280","VM-HDFCBK","VM-BOIIND","BP-SBIMBS","BP-ATMSBI","AM-HDFCBK","VM-UnionB","VM-UIICHO","VM-CBSSBI","VM-CorpBk","VL-CENTBK","VM-CENTBK","BW-PNBSMS"};
+    String smsMessage = "", smsMessageStr = "", mAmount = "", smsAccNo = "", ReadAcc = "";;
+    public static int NoBank = 12;
+    public static String stringArray[] = {"8451043280", "VM-HDFCBK", "VM-BOIIND", "BP-SBIMBS", "BP-ATMSBI", "AM-HDFCBK", "VM-UnionB", "VM-UIICHO", "VM-CBSSBI", "VM-CorpBk", "VL-CENTBK", "VM-CENTBK", "BW-PNBSMS"};
 
     public static SmsActivity instance() {
         return inst;
@@ -43,7 +44,7 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
         setContentView(R.layout.activity_sms);
 
         /* Button for Database */
-        Button But1= (Button) findViewById(R.id.buttonDb);
+        Button But1 = (Button) findViewById(R.id.buttonDb);
         But1.setOnClickListener(new AdapterView.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -52,16 +53,30 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
                 for (int i = 0; i < Val.size(); i++) {
                     arrayAdapter.add(Val.get(i));
                 }
-
             }
         });
 
         /* Button for Messages */
-        Button But2= (Button) findViewById(R.id.messages);
-        But2.setOnClickListener(new AdapterView.OnClickListener(){
+        Button But2 = (Button) findViewById(R.id.messages);
+        But2.setOnClickListener(new AdapterView.OnClickListener() {
             @Override
-            public void onClick(View view){
+            public void onClick(View view) {
                 refreshSmsInbox();
+            }
+        });
+
+        Button But3 = (Button) findViewById(R.id.submit);
+        final EditText mEdit;
+        mEdit = (EditText) findViewById(R.id.accRead);
+        But3.setOnClickListener(new AdapterView.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ReadAcc = mEdit.getText().toString();
+                ArrayList<String> Val = db.Selected(ReadAcc);
+                arrayAdapter.clear();
+                for (int i = 0; i < Val.size(); i++) {
+                    arrayAdapter.add(Val.get(i));
+                }
             }
         });
 

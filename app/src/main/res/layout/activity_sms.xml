@@ -13,6 +13,26 @@
         android:layout_gravity="center_horizontal" />
 
     <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/UserInput"
+        android:orientation="horizontal">
+        <EditText
+            android:layout_width="100pt"
+            android:layout_height="wrap_content"
+            android:id="@+id/accRead"
+            android:inputType="text" >
+            <requestFocus/>
+        </EditText>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/submit"
+            android:text="Submit"/>
+
+    </LinearLayout>
+
+    <LinearLayout
         android:id="@+id/top_buttons"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

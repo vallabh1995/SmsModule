@@ -82,4 +82,44 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
         return DataList;
     }
+
+    public ArrayList<String> Selected(String Account) {
+        float Sum1=0,Sum2=0;
+        ArrayList<String> DataList = new ArrayList<String>();
+        //Select AMOUNT from table where status is CREDITED and account number matches
+        String selectQuery = "SELECT  "+ AMOUNT+" FROM " + TABLE_NAME + " WHERE " + ACCOUNT_NO + " LIKE \"" + Account + "\" AND "+ STATUS + " LIKE \"CREDITED\"";
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        String amo,Entry1="";
+
+        // looping through all rows and adding to list
+        if (cursor.moveToFirst()) {
+            do {
+                amo="";
+                amo+=cursor.getString(0);
+                Sum1+=Float.parseFloat(amo.toString());
+            } while (cursor.moveToNext());
+            Entry1+="\n "+Account+" CREDITED : "+Sum1;
+            DataList.add(Entry1);
+        }
+
+        //Select AMOUNT from table where status is CREDITED and account number matches
+        selectQuery = "SELECT  "+ AMOUNT+" FROM " + TABLE_NAME + " WHERE " + ACCOUNT_NO + " LIKE \"" + Account + "\" AND "+ STATUS + " LIKE \"DEBITED\"";
+        cursor = db.rawQuery(selectQuery, null);
+
+        // looping through all rows and adding to list
+        if (cursor.moveToFirst()) {
+            do {
+                amo="";
+                amo+=cursor.getString(0);
+                Sum2+=Float.parseFloat(amo.toString());
+            } while (cursor.moveToNext());
+            Entry1="\n "+Account+" DEBITED : "+Sum2;
+            DataList.add(Entry1);
+        }
+        Entry1="\n "+Account+" Total : "+(Sum1-Sum2);
+        DataList.add(Entry1);
+        return DataList;
+    }
 }
