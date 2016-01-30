@@ -27,7 +27,7 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
     public static int NoBank = 12;
     public static String stringArray[] = {"8451043280", "VM-HDFCBK", "VM-BOIIND", "BP-SBIMBS", "BP-ATMSBI", "AM-HDFCBK", "VM-UnionB", "VM-UIICHO", "VM-CBSSBI", "VM-CorpBk", "VL-CENTBK", "VM-CENTBK", "BW-PNBSMS"};
     public ArrayList<String> accountNumbers=new ArrayList<String>();
-    public int accountI=1;
+    public int accountI=0;
 
 
     public static SmsActivity instance() {
@@ -44,7 +44,6 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sms);
-        accountNumbers.add("**16...337");
 
         /* Button for Database */
         Button But1 = (Button) findViewById(R.id.buttonDb);
@@ -114,13 +113,49 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
         if (indexBody < 0 || !smsInboxCursor.moveToFirst()) return;
         arrayAdapter.clear();
         int i;
+        int a,b;
         do {
+            smsMessage="";smsAccNo="";
             String strAddress = smsInboxCursor.getString(indexAddress);
             String str = "SMS From: " + smsInboxCursor.getString(indexAddress) +
                     "\n" + smsInboxCursor.getString(indexBody).toLowerCase() + "\n";
+            smsMessage+=smsInboxCursor.getString(indexBody).toLowerCase();
             for(i=0;i<=NoBank;i++) {
                 if (stringArray[i].equalsIgnoreCase(strAddress)) {
                     arrayAdapter.add(str);
+
+                    //SearchForAccountNumber
+                    if(smsMessage.contains("a/c no.")) {
+                        a=smsMessage.indexOf("a/c");
+                        b=smsMessage.indexOf(" ",a+8);
+                        smsAccNo  += smsMessage.substring(a+7,b);
+                    }
+                    else if(smsMessage.contains("a/c")) {
+                        a=smsMessage.indexOf("a/c");
+                        b=smsMessage.indexOf(" ",a+4);
+                        smsAccNo  += smsMessage.substring(a+4,b);
+                    }
+                    else if(smsMessage.contains("account number")) {
+                        a=smsMessage.indexOf("account");
+                        b=smsMessage.indexOf(" ",a+15);
+                        smsAccNo += smsMessage.substring(a+15,b);
+                    }
+                    else if (smsMessage.contains("account")) {
+                        a=smsMessage.indexOf("account");
+                        b=smsMessage.indexOf(" ",a+8);
+                        smsAccNo += smsMessage.substring(a+8,b);
+                    }
+                    int found=0;
+                    String Temp="";
+                    for(int j=0;j<accountI;j++) {
+                        Temp=accountNumbers.get(j);
+                        if(Temp.equalsIgnoreCase(smsAccNo))
+                        { found=1; break;}
+                    }
+                    if(found!=1) {
+                        accountNumbers.add(smsAccNo);
+                        accountI++;
+                    }
                     break;
                 }
             }
@@ -176,19 +211,6 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
                 a=smsMessage.indexOf("account");
                 b=smsMessage.indexOf(" ",a+8);
                 smsAccNo += smsMessage.substring(a+8,b);
-            }
-
-            int found=0;
-            String Temp="";
-            for(int i=0;i<accountI;i++) {
-                Temp=accountNumbers.get(i);
-                if(Temp.equalsIgnoreCase(smsAccNo))
-                { found=1; break;}
-            }
-
-            if(found!=1) {
-                accountNumbers.add(smsAccNo);
-                accountI++;
             }
 
             //Amount
