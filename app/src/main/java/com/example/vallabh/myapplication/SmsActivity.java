@@ -2,6 +2,7 @@ package com.example.vallabh.myapplication;
 
 import android.content.ContentResolver;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -60,6 +61,10 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
             public void onClick(View view) {
                 ArrayList<String> Val = db.getAllvalues();
                 arrayAdapter.clear();
+                for (int i = 0; i < Val.size(); i++) {
+                    arrayAdapter.add(Val.get(i));
+                }
+                Val = db.Selected2();
                 for (int i = 0; i < Val.size(); i++) {
                     arrayAdapter.add(Val.get(i));
                 }
@@ -126,6 +131,7 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
         do {
             smsMessage = "";
             smsAccNo = "";
+            int DB,SMS;
             String strAddress = smsInboxCursor.getString(indexAddress);
             String str = "SMS From: " + smsInboxCursor.getString(indexAddress) +
                     "\n" + smsInboxCursor.getString(indexBody).toLowerCase() + "\n";
@@ -134,7 +140,7 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
             calendar.setTimeInMillis(timestamp);
             Date finalDate = calendar.getTime();
             String smsDate = finalDate.toString();
-            str+="Date : "+smsDate;
+            str+="Date : "+smsDate+"\nSt : "+Time;
 
             smsMessage += smsInboxCursor.getString(indexBody).toLowerCase();
             for (i = 0; i <= NoBank; i++) {
@@ -175,6 +181,11 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
 
                     if(StartApp==1) {
                         AppOpenAction(smsMessage);
+                        ArrayList<String> Val = db.Selected2();
+                        if(Val.size()==0)
+                        {db.AddFirstDate("0000000000000");}
+
+
                     }
                     break;
                 }

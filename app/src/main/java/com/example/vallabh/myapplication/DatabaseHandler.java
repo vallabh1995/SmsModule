@@ -11,13 +11,18 @@ import java.util.ArrayList;
 public class DatabaseHandler extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "SMSData";
     public static final int DATABASE_VERSION = 1;
-    public static final String TABLE_NAME = "triAcc"; //Table Name
+    public static final String TABLE_NAME = "triAcc"; //Table Name 1
+    public static final String TABLE_NAME2 = "TimeStore";
 
-    //Column Names
+    //Column Names 1
     public static final String ACCOUNT_NO = "accountNo";
     public static final String STATUS = "credit_debit";
     public static final String AMOUNT = "amount";
     public static final String KEY_ID = "_id";
+
+    //Column Name 2
+    public static final String TIME = "time";
+    public static final String KEY_ID2 = "_id2";
 
     public DatabaseHandler (Context context) {
         super(context,DATABASE_NAME,null,DATABASE_VERSION);
@@ -34,11 +39,17 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 + AMOUNT + " TEXT )";
         db.execSQL(CREATE_CONTACTS_TABLE);
 
+       CREATE_CONTACTS_TABLE = "CREATE TABLE " + TABLE_NAME2 + "( "
+                + KEY_ID2 + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                + TIME + " TEXT )";
+        db.execSQL(CREATE_CONTACTS_TABLE);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion){
         db.execSQL("DROP TABLE IF EXISTS "+TABLE_NAME);
+        onCreate(db);
+        db.execSQL("DROP TABLE IF EXISTS "+TABLE_NAME2);
         onCreate(db);
     }
 
@@ -53,6 +64,47 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         // Inserting Row
         db.insert(TABLE_NAME, null, values);
         db.close(); // Closing database connection
+    }
+
+   void AddFirstDate(String Data){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(TIME, Data);
+
+        db.insert(TABLE_NAME2, null, values);
+        db.close();
+    }
+
+    void update(String Date){
+        SQLiteDatabase db = this.getWritableDatabase();
+        int key=1;
+        String updateQuery = "UPDATE " + TABLE_NAME2 + " SET " + TIME + " = \'" + Date + "\' WHERE " + KEY_ID2 + " = " + key;
+        db.execSQL(updateQuery,null);
+    }
+
+    public ArrayList<String> Selected2() {
+        ArrayList<String> DataList = new ArrayList<String>();
+        // Select All Query
+        String selectQuery = "SELECT * FROM " + TABLE_NAME2;
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        String id,Data,Entry1;
+
+        // looping through all rows and adding to list
+        if (cursor.moveToFirst()) {
+            do {
+                Entry1 = "";
+                id="";
+                Data="";
+                id+=cursor.getString(0);
+                Data+=cursor.getString(1);
+                Entry1+="\n "+id+" "+Data;
+                DataList.add(Entry1);
+            } while (cursor.moveToNext());
+        }
+        return DataList;
     }
 
     public ArrayList<String> getAllvalues() {
