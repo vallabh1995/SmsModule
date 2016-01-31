@@ -185,7 +185,6 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
                         if(Val.size()==0)
                         {db.AddFirstDate("0000000000000");}
 
-
                     }
                     break;
                 }
