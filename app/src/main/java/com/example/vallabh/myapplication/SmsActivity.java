@@ -28,7 +28,7 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
     /*DATABASE HANDLES*/
     final DatabaseHandler db = new DatabaseHandler(this);
     String smsMessage = "", smsMessageStr = "", mAmount = "", smsAccNo = "", ReadAcc = "";
-    public int StartApp=1;
+    public int StartApp=0;
     /*BANK SMS ADDRESSES*/
     public static int NoBank = 12;
     public static String stringArray[] = {"8451043280", "VM-HDFCBK", "VM-BOIIND", "BP-SBIMBS", "BP-ATMSBI", "AM-HDFCBK", "VM-UnionB", "VM-UIICHO", "VM-CBSSBI", "VM-CorpBk", "VL-CENTBK", "VM-CENTBK", "BW-PNBSMS"};
@@ -61,10 +61,6 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
             public void onClick(View view) {
                 ArrayList<String> Val = db.getAllvalues();
                 arrayAdapter.clear();
-                for (int i = 0; i < Val.size(); i++) {
-                    arrayAdapter.add(Val.get(i));
-                }
-                Val = db.Selected2();
                 for (int i = 0; i < Val.size(); i++) {
                     arrayAdapter.add(Val.get(i));
                 }
@@ -115,6 +111,13 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
         smsListView.setAdapter(arrayAdapter);
         smsListView.setOnItemClickListener(this);
 
+        ArrayList<String> Val = db.Selected2();
+        if(Val.size()==0)
+        {
+            db.AddFirstDate("0000000000000");
+            StartApp=1;
+        }
+
         refreshSmsInbox();
         StartApp=0;
     }
@@ -131,7 +134,7 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
         do {
             smsMessage = "";
             smsAccNo = "";
-            int DB,SMS;
+            float DB,SMS;
             String strAddress = smsInboxCursor.getString(indexAddress);
             String str = "SMS From: " + smsInboxCursor.getString(indexAddress) +
                     "\n" + smsInboxCursor.getString(indexBody).toLowerCase() + "\n";
@@ -140,8 +143,8 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
             calendar.setTimeInMillis(timestamp);
             Date finalDate = calendar.getTime();
             String smsDate = finalDate.toString();
-            str+="Date : "+smsDate+"\nSt : "+Time;
-
+            str+="Date : "+smsDate+"\nTimeStamp : "+Time;
+            SMS=Float.parseFloat(Time);
             smsMessage += smsInboxCursor.getString(indexBody).toLowerCase();
             for (i = 0; i <= NoBank; i++) {
                 if (stringArray[i].equalsIgnoreCase(strAddress)) {
@@ -182,9 +185,22 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
                     if(StartApp==1) {
                         AppOpenAction(smsMessage);
                         ArrayList<String> Val = db.Selected2();
-                        if(Val.size()==0)
-                        {db.AddFirstDate("0000000000000");}
-
+                        String S1 = Val.get(Val.size() - 1);
+                        DB = Float.parseFloat(S1);
+                        if (SMS > DB) {
+                            Toast.makeText(this, "Added : |" + DB + "|", Toast.LENGTH_SHORT).show();
+                            db.AddFirstDate(Time);
+                        }
+                    }
+                    else {
+                        ArrayList<String> Val = db.Selected2();
+                        String S1 = Val.get(Val.size() - 1);
+                        DB = Float.parseFloat(S1);
+                        if (SMS > DB) {
+                            Toast.makeText(this, "Added : |" + DB + "|", Toast.LENGTH_SHORT).show();
+                            db.AddFirstDate(Time);
+                            AppOpenAction(smsMessage);
+                        }
                     }
                     break;
                 }
@@ -262,7 +278,6 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
 
     public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
         try {
-            String[] smsMessages = smsMessagesList.get(pos).split("\n");
 
         } catch (Exception e) {
             e.printStackTrace();

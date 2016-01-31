@@ -75,17 +75,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.close();
     }
 
-    void update(String Date){
-        SQLiteDatabase db = this.getWritableDatabase();
-        int key=1;
-        String updateQuery = "UPDATE " + TABLE_NAME2 + " SET " + TIME + " = \'" + Date + "\' WHERE " + KEY_ID2 + " = " + key;
-        db.execSQL(updateQuery,null);
-    }
-
     public ArrayList<String> Selected2() {
         ArrayList<String> DataList = new ArrayList<String>();
         // Select All Query
-        String selectQuery = "SELECT * FROM " + TABLE_NAME2;
+        String selectQuery = "SELECT "+TIME+" FROM " + TABLE_NAME2;
 
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
@@ -96,11 +89,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         if (cursor.moveToFirst()) {
             do {
                 Entry1 = "";
-                id="";
+                //id="";
                 Data="";
-                id+=cursor.getString(0);
-                Data+=cursor.getString(1);
-                Entry1+="\n "+id+" "+Data;
+                //id+=cursor.getString(0);
+                Data+=cursor.getString(0);
+                Entry1+=/*id+" "+*/Data;
                 DataList.add(Entry1);
             } while (cursor.moveToNext());
         }
