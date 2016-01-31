@@ -15,6 +15,8 @@ import android.widget.ListView;
 import android.widget.Toast;
 import android.widget.Button;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 public class SmsActivity extends AppCompatActivity implements OnItemClickListener {
 
@@ -22,12 +24,18 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
     ArrayList<String> smsMessagesList = new ArrayList<String>();
     ListView smsListView;
     ArrayAdapter arrayAdapter;
+    /*DATABASE HANDLES*/
     final DatabaseHandler db = new DatabaseHandler(this);
-    String smsMessage = "", smsMessageStr = "", mAmount = "", smsAccNo = "", ReadAcc = "";;
+    String smsMessage = "", smsMessageStr = "", mAmount = "", smsAccNo = "", ReadAcc = "";
+    public int StartApp=1;
+    /*BANK SMS ADDRESSES*/
     public static int NoBank = 12;
     public static String stringArray[] = {"8451043280", "VM-HDFCBK", "VM-BOIIND", "BP-SBIMBS", "BP-ATMSBI", "AM-HDFCBK", "VM-UnionB", "VM-UIICHO", "VM-CBSSBI", "VM-CorpBk", "VL-CENTBK", "VM-CENTBK", "BW-PNBSMS"};
-    public ArrayList<String> accountNumbers=new ArrayList<String>();
-    public int accountI=0;
+    /*ACCOUNT NUMBER*/
+    public ArrayList<String> accountNumbers = new ArrayList<String>();
+    public int accountI = 0;
+    /*CALENDER*/
+    Calendar calendar = Calendar.getInstance();
 
 
     public static SmsActivity instance() {
@@ -73,11 +81,11 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
         But3.setOnClickListener(new AdapterView.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ReadAcc="";
+                ReadAcc = "";
                 ReadAcc += mEdit.getText().toString();
 
                 //For selected account number
-                if(ReadAcc!="") {
+                if (ReadAcc != "") {
                     ArrayList<String> Val = db.Selected(ReadAcc);
                     arrayAdapter.clear();
                     for (int i = 0; i < Val.size(); i++) {
@@ -87,7 +95,7 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
                 //For all accounts in the string
                 else {
                     arrayAdapter.clear();
-                    for(int j=0;j<accountI;j++){
+                    for (int j = 0; j < accountI; j++) {
                         ArrayList<String> Val = db.Selected(accountNumbers.get(j));
                         for (int i = 0; i < Val.size(); i++) {
                             arrayAdapter.add(Val.get(i));
@@ -103,6 +111,7 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
         smsListView.setOnItemClickListener(this);
 
         refreshSmsInbox();
+        StartApp=0;
     }
 
     public void refreshSmsInbox() {
@@ -113,48 +122,59 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
         if (indexBody < 0 || !smsInboxCursor.moveToFirst()) return;
         arrayAdapter.clear();
         int i;
-        int a,b;
+        int a, b;
         do {
-            smsMessage="";smsAccNo="";
+            smsMessage = "";
+            smsAccNo = "";
             String strAddress = smsInboxCursor.getString(indexAddress);
             String str = "SMS From: " + smsInboxCursor.getString(indexAddress) +
                     "\n" + smsInboxCursor.getString(indexBody).toLowerCase() + "\n";
-            smsMessage+=smsInboxCursor.getString(indexBody).toLowerCase();
-            for(i=0;i<=NoBank;i++) {
+            String Time = smsInboxCursor.getString(smsInboxCursor.getColumnIndex("date"));
+            Long timestamp = Long.parseLong(Time);
+            calendar.setTimeInMillis(timestamp);
+            Date finalDate = calendar.getTime();
+            String smsDate = finalDate.toString();
+            str+="Date : "+smsDate;
+
+            smsMessage += smsInboxCursor.getString(indexBody).toLowerCase();
+            for (i = 0; i <= NoBank; i++) {
                 if (stringArray[i].equalsIgnoreCase(strAddress)) {
                     arrayAdapter.add(str);
 
                     //SearchForAccountNumber
-                    if(smsMessage.contains("a/c no.")) {
-                        a=smsMessage.indexOf("a/c");
-                        b=smsMessage.indexOf(" ",a+8);
-                        smsAccNo  += smsMessage.substring(a+7,b);
+                    if (smsMessage.contains("a/c no.")) {
+                        a = smsMessage.indexOf("a/c");
+                        b = smsMessage.indexOf(" ", a + 8);
+                        smsAccNo += smsMessage.substring(a + 7, b);
+                    } else if (smsMessage.contains("a/c")) {
+                        a = smsMessage.indexOf("a/c");
+                        b = smsMessage.indexOf(" ", a + 4);
+                        smsAccNo += smsMessage.substring(a + 4, b);
+                    } else if (smsMessage.contains("account number")) {
+                        a = smsMessage.indexOf("account");
+                        b = smsMessage.indexOf(" ", a + 15);
+                        smsAccNo += smsMessage.substring(a + 15, b);
+                    } else if (smsMessage.contains("account")) {
+                        a = smsMessage.indexOf("account");
+                        b = smsMessage.indexOf(" ", a + 8);
+                        smsAccNo += smsMessage.substring(a + 8, b);
                     }
-                    else if(smsMessage.contains("a/c")) {
-                        a=smsMessage.indexOf("a/c");
-                        b=smsMessage.indexOf(" ",a+4);
-                        smsAccNo  += smsMessage.substring(a+4,b);
+                    int found = 0;
+                    String Temp = "";
+                    for (int j = 0; j < accountI; j++) {
+                        Temp = accountNumbers.get(j);
+                        if (Temp.equalsIgnoreCase(smsAccNo)) {
+                            found = 1;
+                            break;
+                        }
                     }
-                    else if(smsMessage.contains("account number")) {
-                        a=smsMessage.indexOf("account");
-                        b=smsMessage.indexOf(" ",a+15);
-                        smsAccNo += smsMessage.substring(a+15,b);
-                    }
-                    else if (smsMessage.contains("account")) {
-                        a=smsMessage.indexOf("account");
-                        b=smsMessage.indexOf(" ",a+8);
-                        smsAccNo += smsMessage.substring(a+8,b);
-                    }
-                    int found=0;
-                    String Temp="";
-                    for(int j=0;j<accountI;j++) {
-                        Temp=accountNumbers.get(j);
-                        if(Temp.equalsIgnoreCase(smsAccNo))
-                        { found=1; break;}
-                    }
-                    if(found!=1) {
+                    if (found != 1) {
                         accountNumbers.add(smsAccNo);
                         accountI++;
+                    }
+
+                    if(StartApp==1) {
+                        AppOpenAction(smsMessage);
                     }
                     break;
                 }
@@ -162,9 +182,9 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
         } while (smsInboxCursor.moveToNext());
     }
 
-    public void updateList(final String smsMessage,final String strAddress2) {
+    public void updateList(final String smsMessage, final String strAddress2) {
         int i;
-        for(i=0;i<=NoBank;i++) {
+        for (i = 0; i <= NoBank; i++) {
             if (stringArray[i].equalsIgnoreCase(strAddress2)) {
                 arrayAdapter.insert(smsMessage, 0);
                 arrayAdapter.notifyDataSetChanged();
@@ -173,65 +193,67 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
         }
     }
 
+    public void AppOpenAction(String Message) {
+        int a=0,b=0;
+        smsMessage = ""; smsMessageStr= ""; mAmount = ""; smsAccNo = "";
+
+        smsMessage+=Message;
+
+        //Status
+        if(smsMessage.contains("credited")) {
+            smsMessageStr +="Credited";
+        }
+        else if(smsMessage.contains("debited") || smsMessage.contains("withdraw")) {
+            smsMessageStr +="Debited";
+        }
+
+        //AccountNumber
+        if(smsMessage.contains("a/c no.")) {
+            a=smsMessage.indexOf("a/c");
+            b=smsMessage.indexOf(" ",a+8);
+            smsAccNo  += smsMessage.substring(a+7,b);
+        }
+        else if(smsMessage.contains("a/c")) {
+            a=smsMessage.indexOf("a/c");
+            b=smsMessage.indexOf(" ",a+4);
+            smsAccNo  += smsMessage.substring(a+4,b);
+        }
+        else if(smsMessage.contains("account number")) {
+            a=smsMessage.indexOf("account");
+            b=smsMessage.indexOf(" ",a+15);
+            smsAccNo += smsMessage.substring(a+15,b);
+        }
+        else if (smsMessage.contains("account")) {
+            a=smsMessage.indexOf("account");
+            b=smsMessage.indexOf(" ",a+8);
+            smsAccNo += smsMessage.substring(a+8,b);
+        }
+
+        //Amount
+        if(smsMessage.contains("rs.")) {
+            a=smsMessage.indexOf("rs.");
+            b=smsMessage.indexOf(" ",a+4);
+            mAmount += smsMessage.substring(a+4,b);
+        }
+        else if(smsMessage.contains("rs")) {
+            a=smsMessage.indexOf("rs");
+            b=smsMessage.indexOf(" ",a+4);
+            mAmount += smsMessage.substring(a+3,b);
+        }
+        else if(smsMessage.contains("inr")) {
+            a=smsMessage.indexOf("inr");
+            b=smsMessage.indexOf(" ",a+4);
+            mAmount += smsMessage.substring(a+4,b);
+        }
+
+        Toast.makeText(this, "Data Contain :\n|"+smsMessageStr+"\n|"+smsAccNo+"\n|"+mAmount, Toast.LENGTH_SHORT).show();
+        db.add(smsMessageStr,smsAccNo,mAmount);
+}
+
     public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
         try {
             String[] smsMessages = smsMessagesList.get(pos).split("\n");
-            int a=0,b=0;
-            smsMessage = ""; smsMessageStr= ""; mAmount = ""; smsAccNo = "";
 
-            for (int i = 1; i < smsMessages.length; ++i) {
-               smsMessage += smsMessages[i];
-            }
-
-            //Status
-            if(smsMessage.contains("credited")) {
-                smsMessageStr +="Credited";
-            }
-            else if(smsMessage.contains("debited") || smsMessage.contains("withdraw")) {
-                smsMessageStr +="Debited";
-            }
-
-            //AccountNumber
-            if(smsMessage.contains("a/c no.")) {
-                a=smsMessage.indexOf("a/c");
-                b=smsMessage.indexOf(" ",a+8);
-                smsAccNo  += smsMessage.substring(a+7,b);
-            }
-            else if(smsMessage.contains("a/c")) {
-                a=smsMessage.indexOf("a/c");
-                b=smsMessage.indexOf(" ",a+4);
-                smsAccNo  += smsMessage.substring(a+4,b);
-            }
-            else if(smsMessage.contains("account number")) {
-                a=smsMessage.indexOf("account");
-                b=smsMessage.indexOf(" ",a+15);
-                smsAccNo += smsMessage.substring(a+15,b);
-            }
-            else if (smsMessage.contains("account")) {
-                a=smsMessage.indexOf("account");
-                b=smsMessage.indexOf(" ",a+8);
-                smsAccNo += smsMessage.substring(a+8,b);
-            }
-
-            //Amount
-            if(smsMessage.contains("rs.")) {
-                a=smsMessage.indexOf("rs.");
-                b=smsMessage.indexOf(" ",a+4);
-                mAmount += smsMessage.substring(a+4,b);
-            }
-            else if(smsMessage.contains("rs")) {
-                a=smsMessage.indexOf("rs");
-                b=smsMessage.indexOf(" ",a+4);
-                mAmount += smsMessage.substring(a+3,b);
-            }
-            else if(smsMessage.contains("inr")) {
-                a=smsMessage.indexOf("inr");
-                b=smsMessage.indexOf(" ",a+4);
-                mAmount += smsMessage.substring(a+4,b);
-            }
-
-            Toast.makeText(this, "Data Contain :\n|"+smsMessageStr+"\n|"+smsAccNo+"\n|"+mAmount, Toast.LENGTH_SHORT).show();
-            db.add(smsMessageStr,smsAccNo,mAmount);
         } catch (Exception e) {
             e.printStackTrace();
         }

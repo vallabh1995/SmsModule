@@ -33,6 +33,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 + ACCOUNT_NO + " TEXT, "
                 + AMOUNT + " TEXT )";
         db.execSQL(CREATE_CONTACTS_TABLE);
+
     }
 
     @Override
@@ -87,7 +88,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         float Sum1=0,Sum2=0;
         ArrayList<String> DataList = new ArrayList<String>();
         //Select AMOUNT from table where status is CREDITED and account number matches
-        String selectQuery = "SELECT  "+ AMOUNT+" FROM " + TABLE_NAME + " WHERE " + ACCOUNT_NO + " LIKE \"" + Account + "\" AND "+ STATUS + " LIKE \"CREDITED\"";
+        String selectQuery = "SELECT  "+ AMOUNT +" FROM " + TABLE_NAME + " WHERE " + ACCOUNT_NO + " LIKE \"" + Account + "\" AND "+ STATUS + " LIKE \"CREDITED\"";
 
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
@@ -105,7 +106,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         }
 
         //Select AMOUNT from table where status is CREDITED and account number matches
-        selectQuery = "SELECT  "+ AMOUNT+" FROM " + TABLE_NAME + " WHERE " + ACCOUNT_NO + " LIKE \"" + Account + "\" AND "+ STATUS + " LIKE \"DEBITED\"";
+        selectQuery = "SELECT  "+ AMOUNT +" FROM " + TABLE_NAME + " WHERE " + ACCOUNT_NO + " LIKE \"" + Account + "\" AND "+ STATUS + " LIKE \"DEBITED\"";
         cursor = db.rawQuery(selectQuery, null);
 
         // looping through all rows and adding to list
