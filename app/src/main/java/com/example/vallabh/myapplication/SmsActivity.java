@@ -59,7 +59,7 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
         But1.setOnClickListener(new AdapterView.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ArrayList<String> Val = db.getAllvalues();
+                ArrayList<String> Val = db.Selected3();
                 arrayAdapter.clear();
                 for (int i = 0; i < Val.size(); i++) {
                     arrayAdapter.add(Val.get(i));
@@ -188,8 +188,8 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
                         String S1 = Val.get(Val.size() - 1);
                         DB = Float.parseFloat(S1);
                         if (SMS > DB) {
-                            Toast.makeText(this, "Added : |" + DB + "|", Toast.LENGTH_SHORT).show();
-                            db.AddFirstDate(Time);
+                           // Toast.makeText(this, "Added : |" + DB + "|", Toast.LENGTH_SHORT).show();
+                            db.UpdateDate(Time);
                         }
                     }
                     else {
@@ -197,8 +197,8 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
                         String S1 = Val.get(Val.size() - 1);
                         DB = Float.parseFloat(S1);
                         if (SMS > DB) {
-                            Toast.makeText(this, "Added : |" + DB + "|", Toast.LENGTH_SHORT).show();
-                            db.AddFirstDate(Time);
+                            //Toast.makeText(this, "Added : |" + DB + "|", Toast.LENGTH_SHORT).show();
+                            db.UpdateDate(Time);
                             AppOpenAction(smsMessage);
                         }
                     }

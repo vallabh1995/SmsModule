@@ -53,6 +53,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         onCreate(db);
     }
 
+    //Insert Row into Message table
     void add(String smsMsgStr1,String smsAccNo1,String mAmount1) {
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -66,6 +67,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.close(); // Closing database connection
     }
 
+    //Add Date to date table
    void AddFirstDate(String Data){
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -74,7 +76,16 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.insert(TABLE_NAME2, null, values);
         db.close();
     }
+    void UpdateDate(String Data){
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(TIME, Data);
 
+        db.update(TABLE_NAME2,values,KEY_ID2 + " LIKE \"%1%\"",null  );
+        db.close();
+    }
+
+    //Returns the last time
     public ArrayList<String> Selected2() {
         ArrayList<String> DataList = new ArrayList<String>();
         // Select All Query
@@ -100,6 +111,33 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return DataList;
     }
 
+    //Temp for displaying time data
+    public ArrayList<String> Selected3() {
+        ArrayList<String> DataList = new ArrayList<String>();
+        // Select All Query
+        String selectQuery = "SELECT * FROM " + TABLE_NAME2;
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        String id,Data,Entry1;
+
+        // looping through all rows and adding to list
+        if (cursor.moveToFirst()) {
+            do {
+                Entry1 = "";
+                id= "";
+                Data= "";
+                id+=cursor.getString(0);
+                Data+=cursor.getString(1);
+                Entry1+="\n "+id+" "+Data;
+                DataList.add(Entry1);
+            } while (cursor.moveToNext());
+        }
+        return DataList;
+    }
+
+    //Reading entries from table 1
     public ArrayList<String> getAllvalues() {
         ArrayList<String> DataList = new ArrayList<String>();
         // Select All Query
@@ -129,6 +167,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return DataList;
     }
 
+    //selecting data from specific account
     public ArrayList<String> Selected(String Account) {
         float Sum1=0,Sum2=0;
         ArrayList<String> DataList = new ArrayList<String>();
