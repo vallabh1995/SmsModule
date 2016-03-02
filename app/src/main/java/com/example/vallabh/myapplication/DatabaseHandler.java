@@ -13,6 +13,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public static final int DATABASE_VERSION = 1;
     public static final String TABLE_NAME = "triAcc"; //Table Name 1
     public static final String TABLE_NAME2 = "TimeStore";
+    public static final String TABLE_NAME3 = "BankDetails";
 
     //Column Names 1
     public static final String ACCOUNT_NO = "accountNo";
@@ -24,8 +25,14 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public static final String TIME = "time";
     public static final String KEY_ID2 = "_id2";
 
-    public DatabaseHandler (Context context) {
-        super(context,DATABASE_NAME,null,DATABASE_VERSION);
+    //Column Name 3
+    public static final String KEY_ID3 = "_id3";
+    public static final String CREDIT = "credit";
+    public static final String DEBIT = "debit";
+    public static final String TOTAL = "total";
+
+    public DatabaseHandler(Context context) {
+        super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
     @Override
@@ -39,22 +46,30 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 + AMOUNT + " TEXT )";
         db.execSQL(CREATE_CONTACTS_TABLE);
 
-       CREATE_CONTACTS_TABLE = "CREATE TABLE " + TABLE_NAME2 + "( "
+        CREATE_CONTACTS_TABLE = "CREATE TABLE " + TABLE_NAME2 + "( "
                 + KEY_ID2 + " INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + TIME + " TEXT )";
+        db.execSQL(CREATE_CONTACTS_TABLE);
+
+        CREATE_CONTACTS_TABLE = "CREATE TABLE " + TABLE_NAME3 + "( "
+                + KEY_ID3 + " INTEGER PRIMARY KEY AUTOINCREMENT, "
+                + ACCOUNT_NO + " TEXT, "
+                + CREDIT + " TEXT, "
+                + DEBIT + " TEXT, "
+                + TOTAL + " TEXT )";
         db.execSQL(CREATE_CONTACTS_TABLE);
     }
 
     @Override
-    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion){
-        db.execSQL("DROP TABLE IF EXISTS "+TABLE_NAME);
+    public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
         onCreate(db);
-        db.execSQL("DROP TABLE IF EXISTS "+TABLE_NAME2);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME2);
         onCreate(db);
     }
 
     //Insert Row into Message table
-    void add(String smsMsgStr1,String smsAccNo1,String mAmount1) {
+    void add(String smsMsgStr1, String smsAccNo1, String mAmount1) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -67,6 +82,31 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.close(); // Closing database connection
     }
 
+    void firstAdd(String smsAccNo1)
+    {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(ACCOUNT_NO,smsAccNo1.toString());
+        values.put(CREDIT,"0");
+        values.put(DEBIT,"0");
+        values.put(TOTAL,"0");
+
+        db.update(TABLE_NAME3, values, ACCOUNT_NO + " LIKE \"%"+smsAccNo1.toString()+"%\"", null);
+
+        db.close();
+    }
+    void Bank(String smsMsgStr1,String smsAccNo1,String mAmount1) {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(STATUS, smsMsgStr1.toString());
+        values.put(ACCOUNT_NO, smsAccNo1.toString());
+        values.put(AMOUNT, mAmount1.toString());
+
+
+    }
+
     //Add Date to date table
    void AddFirstDate(String Data){
         SQLiteDatabase db = this.getWritableDatabase();
@@ -76,12 +116,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.insert(TABLE_NAME2, null, values);
         db.close();
     }
+
     void UpdateDate(String Data){
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(TIME, Data);
-
-        db.update(TABLE_NAME2,values,KEY_ID2 + " LIKE \"%1%\"",null  );
+        db.update(TABLE_NAME2, values, KEY_ID2 + " LIKE \"%1%\"", null);
         db.close();
     }
 
@@ -115,22 +155,28 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public ArrayList<String> Selected3() {
         ArrayList<String> DataList = new ArrayList<String>();
         // Select All Query
-        String selectQuery = "SELECT * FROM " + TABLE_NAME2;
+        String selectQuery = "SELECT * FROM " + TABLE_NAME3;
 
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
 
-        String id,Data,Entry1;
+        String id,deb,cre,tot,acc,Entry1;
 
         // looping through all rows and adding to list
         if (cursor.moveToFirst()) {
             do {
                 Entry1 = "";
                 id= "";
-                Data= "";
+                deb= "";
+                cre="";
+                tot="";
+                acc="";
                 id+=cursor.getString(0);
-                Data+=cursor.getString(1);
-                Entry1+="\n "+id+" "+Data;
+                acc+=cursor.getString(1);
+                cre+=cursor.getString(2);
+                deb+=cursor.getString(3);
+                tot+=cursor.getString(4);
+                Entry1+="\n "+id+" "+acc+" "+cre+" "+deb+" "+tot;
                 DataList.add(Entry1);
             } while (cursor.moveToNext());
         }

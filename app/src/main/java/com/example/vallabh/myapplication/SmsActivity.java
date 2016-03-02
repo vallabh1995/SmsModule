@@ -34,7 +34,8 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
     public static String stringArray[] = {"8451043280", "VM-HDFCBK", "VM-BOIIND", "BP-SBIMBS", "BP-ATMSBI", "AM-HDFCBK", "VM-UnionB", "VM-UIICHO", "VM-CBSSBI", "VM-CorpBk", "VL-CENTBK", "VM-CENTBK", "BW-PNBSMS"};
     /*ACCOUNT NUMBER*/
     public ArrayList<String> accountNumbers = new ArrayList<String>();
-    public int accountI = 0;
+    public int accountI = 0,ft;
+    public String PushTime;
     /*CALENDER*/
     Calendar calendar = Calendar.getInstance();
 
@@ -117,8 +118,9 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
             db.AddFirstDate("0000000000000");
             StartApp=1;
         }
-
         refreshSmsInbox();
+        ft=0;
+        db.UpdateDate(PushTime);
         StartApp=0;
     }
 
@@ -146,6 +148,10 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
             str+="Date : "+smsDate+"\nTimeStamp : "+Time;
             SMS=Float.parseFloat(Time);
             smsMessage += smsInboxCursor.getString(indexBody).toLowerCase();
+            if(ft==0){
+                ft=1;
+                PushTime=Time;
+            }
             for (i = 0; i <= NoBank; i++) {
                 if (stringArray[i].equalsIgnoreCase(strAddress)) {
                     arrayAdapter.add(str);
@@ -179,28 +185,20 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
                     }
                     if (found != 1) {
                         accountNumbers.add(smsAccNo);
+                        db.firstAdd(smsAccNo);
                         accountI++;
                     }
 
                     if(StartApp==1) {
                         AppOpenAction(smsMessage);
-                        ArrayList<String> Val = db.Selected2();
-                        String S1 = Val.get(Val.size() - 1);
-                        DB = Float.parseFloat(S1);
-                        if (SMS > DB) {
-                           // Toast.makeText(this, "Added : |" + DB + "|", Toast.LENGTH_SHORT).show();
-                            db.UpdateDate(Time);
-                        }
                     }
                     else {
                         ArrayList<String> Val = db.Selected2();
                         String S1 = Val.get(Val.size() - 1);
                         DB = Float.parseFloat(S1);
                         if (SMS > DB) {
-                            //Toast.makeText(this, "Added : |" + DB + "|", Toast.LENGTH_SHORT).show();
-                            db.UpdateDate(Time);
                             AppOpenAction(smsMessage);
-                        }
+                       }
                     }
                     break;
                 }
