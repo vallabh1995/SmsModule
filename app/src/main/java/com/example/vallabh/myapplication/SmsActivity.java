@@ -55,12 +55,13 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sms);
 
-        /* Button for Database */
+        /*
+        /* Button for Database
         Button But1 = (Button) findViewById(R.id.buttonDb);
         But1.setOnClickListener(new AdapterView.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ArrayList<String> Val = db.Selected3();
+                ArrayList<String> Val = db.getAllvalues();
                 arrayAdapter.clear();
                 for (int i = 0; i < Val.size(); i++) {
                     arrayAdapter.add(Val.get(i));
@@ -68,7 +69,7 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
             }
         });
 
-        /* Button for Messages */
+        /* Button for Messages
         Button But2 = (Button) findViewById(R.id.messages);
         But2.setOnClickListener(new AdapterView.OnClickListener() {
             @Override
@@ -76,33 +77,18 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
                 refreshSmsInbox();
             }
         });
-
+        */
         Button But3 = (Button) findViewById(R.id.submit);
-        final EditText mEdit;
-        mEdit = (EditText) findViewById(R.id.accRead);
         But3.setOnClickListener(new AdapterView.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ReadAcc = "";
-                ReadAcc += mEdit.getText().toString();
-
                 //For selected account number
-                if (ReadAcc != "") {
-                    ArrayList<String> Val = db.Selected(ReadAcc);
-                    arrayAdapter.clear();
+                arrayAdapter.clear();
+                for (int j = 0; j < accountI; j++) {
+                    ArrayList<String> Val = db.Selected(accountNumbers.get(j));
                     for (int i = 0; i < Val.size(); i++) {
                         arrayAdapter.add(Val.get(i));
-                    }
-                }
-                //For all accounts in the string
-                else {
-                    arrayAdapter.clear();
-                    for (int j = 0; j < accountI; j++) {
-                        ArrayList<String> Val = db.Selected(accountNumbers.get(j));
-                        for (int i = 0; i < Val.size(); i++) {
-                            arrayAdapter.add(Val.get(i));
-                        }
-                    }
+                   }
                 }
             }
         });
@@ -122,6 +108,13 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
         ft=0;
         db.UpdateDate(PushTime);
         StartApp=0;
+        arrayAdapter.clear();
+        for (int j = 0; j < accountI; j++) {
+            Val = db.Selected(accountNumbers.get(j));
+            for (int i = 0; i < Val.size(); i++) {
+                arrayAdapter.add(Val.get(i));
+            }
+        }
     }
 
     public void refreshSmsInbox() {
@@ -138,14 +131,14 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
             smsAccNo = "";
             float DB,SMS;
             String strAddress = smsInboxCursor.getString(indexAddress);
-            String str = "SMS From: " + smsInboxCursor.getString(indexAddress) +
-                    "\n" + smsInboxCursor.getString(indexBody).toLowerCase() + "\n";
+            //String str = "SMS From: " + smsInboxCursor.getString(indexAddress) +
+            //        "\n" + smsInboxCursor.getString(indexBody).toLowerCase() + "\n";
             String Time = smsInboxCursor.getString(smsInboxCursor.getColumnIndex("date"));
             Long timestamp = Long.parseLong(Time);
             calendar.setTimeInMillis(timestamp);
-            Date finalDate = calendar.getTime();
-            String smsDate = finalDate.toString();
-            str+="Date : "+smsDate+"\nTimeStamp : "+Time;
+            //Date finalDate = calendar.getTime();
+            //String smsDate = finalDate.toString();
+            //str+="Date : "+smsDate+"\nTimeStamp : "+Time;
             SMS=Float.parseFloat(Time);
             smsMessage += smsInboxCursor.getString(indexBody).toLowerCase();
             if(ft==0){
@@ -154,7 +147,7 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
             }
             for (i = 0; i <= NoBank; i++) {
                 if (stringArray[i].equalsIgnoreCase(strAddress)) {
-                    arrayAdapter.add(str);
+                    //arrayAdapter.add(str);
 
                     //SearchForAccountNumber
                     if (smsMessage.contains("a/c no.")) {
@@ -190,14 +183,14 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
                     }
 
                     if(StartApp==1) {
-                        AppOpenAction(smsMessage);
+                        AddEntry(smsMessage);
                     }
                     else {
                         ArrayList<String> Val = db.Selected2();
                         String S1 = Val.get(Val.size() - 1);
                         DB = Float.parseFloat(S1);
                         if (SMS > DB) {
-                            AppOpenAction(smsMessage);
+                            AddEntry(smsMessage);
                        }
                     }
                     break;
@@ -217,7 +210,7 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
         }
     }
 
-    public void AppOpenAction(String Message) {
+    public void AddEntry(String Message) {
         int a=0,b=0;
         smsMessage = ""; smsMessageStr= ""; mAmount = ""; smsAccNo = "";
 
@@ -276,6 +269,22 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
 
     public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
         try {
+            String[] smsMessages = smsMessagesList.get(pos).split("\n");
+            String ClickedItem="",Acc="";
+            int a=0,b=0;
+            for (int i = 1; i < smsMessages.length; ++i) {
+                ClickedItem += smsMessages[i];
+            }
+            a=ClickedItem.indexOf(" ");
+            b=ClickedItem.indexOf(" ",a+2);
+            Acc+=ClickedItem.substring(a+1, b);
+
+           // Toast.makeText(this, "Message : |"+Acc+"|", Toast.LENGTH_SHORT).show();
+            ArrayList<String> Val = db.Selected3(Acc);
+            arrayAdapter.clear();
+            for (int i = 0; i < Val.size(); i++) {
+                arrayAdapter.add(Val.get(i));
+            }
 
         } catch (Exception e) {
             e.printStackTrace();

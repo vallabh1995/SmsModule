@@ -17,44 +17,13 @@
         android:layout_height="wrap_content"
         android:id="@+id/UserInput"
         android:orientation="horizontal">
-        <EditText
-            android:layout_width="100pt"
-            android:layout_height="wrap_content"
-            android:id="@+id/accRead"
-            android:inputType="text" >
-            <requestFocus/>
-        </EditText>
         <Button
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/submit"
-            android:text="Submit"/>
+            android:text="Home"/>
 
     </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/top_buttons"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:weightSum="2"
-        android:orientation="horizontal" >
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Messages"
-            android:layout_weight="1"
-            android:id="@+id/messages" />
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Database"
-            android:layout_weight="1"
-            android:id="@+id/buttonDb" />
-
-    </LinearLayout>
-
 
     <ListView android:id="@+id/SMSList"
         android:layout_height="wrap_content"

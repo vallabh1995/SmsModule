@@ -82,8 +82,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.close(); // Closing database connection
     }
 
-    void firstAdd(String smsAccNo1)
-    {
+    void firstAdd(String smsAccNo1) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -92,10 +91,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(DEBIT,"0");
         values.put(TOTAL,"0");
 
-        db.update(TABLE_NAME3, values, ACCOUNT_NO + " LIKE \"%"+smsAccNo1.toString()+"%\"", null);
-
+        db.insert(TABLE_NAME3, null, values);
         db.close();
     }
+
     void Bank(String smsMsgStr1,String smsAccNo1,String mAmount1) {
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -103,12 +102,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(STATUS, smsMsgStr1.toString());
         values.put(ACCOUNT_NO, smsAccNo1.toString());
         values.put(AMOUNT, mAmount1.toString());
-
-
     }
 
     //Add Date to date table
-   void AddFirstDate(String Data){
+    void AddFirstDate(String Data){
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(TIME, Data);
@@ -116,7 +113,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.insert(TABLE_NAME2, null, values);
         db.close();
     }
-
+    //Update Date in the table
     void UpdateDate(String Data){
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
@@ -134,7 +131,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
 
-        String id,Data,Entry1;
+        String Data,Entry1;
 
         // looping through all rows and adding to list
         if (cursor.moveToFirst()) {
@@ -151,32 +148,29 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return DataList;
     }
 
-    //Temp for displaying time data
-    public ArrayList<String> Selected3() {
+    //Returns transaction ata for specific banks
+    public ArrayList<String> Selected3(String Account) {
         ArrayList<String> DataList = new ArrayList<String>();
         // Select All Query
-        String selectQuery = "SELECT * FROM " + TABLE_NAME3;
+        String selectQuery = "SELECT  * FROM " + TABLE_NAME+ " WHERE " + ACCOUNT_NO + " LIKE \"" + Account+"\"";
 
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
 
-        String id,deb,cre,tot,acc,Entry1;
-
+        String sta,acc,amo,Entry1;
+        int id=0;
         // looping through all rows and adding to list
         if (cursor.moveToFirst()) {
             do {
+                id++;
                 Entry1 = "";
-                id= "";
-                deb= "";
-                cre="";
-                tot="";
+                sta="";
                 acc="";
-                id+=cursor.getString(0);
-                acc+=cursor.getString(1);
-                cre+=cursor.getString(2);
-                deb+=cursor.getString(3);
-                tot+=cursor.getString(4);
-                Entry1+="\n "+id+" "+acc+" "+cre+" "+deb+" "+tot;
+                amo="";
+                sta+=cursor.getString(1);
+                acc+=cursor.getString(2);
+                amo+=cursor.getString(3);
+                Entry1+="\n "+id+" "+sta+" "+acc+" "+amo;
                 DataList.add(Entry1);
             } while (cursor.moveToNext());
         }
@@ -222,7 +216,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
 
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
-        String amo,Entry1="";
+        String amo,Entry1;
 
         // looping through all rows and adding to list
         if (cursor.moveToFirst()) {
@@ -231,11 +225,10 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 amo+=cursor.getString(0);
                 Sum1+=Float.parseFloat(amo.toString());
             } while (cursor.moveToNext());
-            Entry1+="\n "+Account+" CREDITED : "+Sum1;
-            DataList.add(Entry1);
+
         }
 
-        //Select AMOUNT from table where status is CREDITED and account number matches
+        //Select AMOUNT from table where status is DEBITED and account number matches
         selectQuery = "SELECT  "+ AMOUNT +" FROM " + TABLE_NAME + " WHERE " + ACCOUNT_NO + " LIKE \"" + Account + "\" AND "+ STATUS + " LIKE \"DEBITED\"";
         cursor = db.rawQuery(selectQuery, null);
 
@@ -246,10 +239,11 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 amo+=cursor.getString(0);
                 Sum2+=Float.parseFloat(amo.toString());
             } while (cursor.moveToNext());
-            Entry1="\n "+Account+" DEBITED : "+Sum2;
-            DataList.add(Entry1);
         }
-        Entry1="\n "+Account+" Total : "+(Sum1-Sum2);
+        Entry1="\n "+Account+
+                "\n CREDITED : "+Sum1+
+                "\n DEBITED : "+Sum2+
+                "\n Total : "+(Sum1-Sum2);
         DataList.add(Entry1);
         return DataList;
     }
