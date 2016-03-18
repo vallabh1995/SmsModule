@@ -6,4 +6,5 @@
     <string name="title_activity_main">MainActivity</string>
     <string name="title_activity_list_view">ListViewActivity</string>
     <string name="title_activity_data_display">DataDisplay</string>
+    <string name="title_activity_second">Second</string>
 </resources>

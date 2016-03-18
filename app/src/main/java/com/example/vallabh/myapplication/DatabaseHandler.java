@@ -20,6 +20,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public static final String STATUS = "credit_debit";
     public static final String AMOUNT = "amount";
     public static final String KEY_ID = "_id";
+    public static final String CATEGORY = "category";
 
     //Column Name 2
     public static final String TIME = "time";
@@ -43,7 +44,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + STATUS + " TEXT, "
                 + ACCOUNT_NO + " TEXT, "
-                + AMOUNT + " TEXT )";
+                + AMOUNT + " TEXT, "
+                + CATEGORY + " TEXT)";
         db.execSQL(CREATE_CONTACTS_TABLE);
 
         CREATE_CONTACTS_TABLE = "CREATE TABLE " + TABLE_NAME2 + "( "
@@ -81,7 +83,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.insert(TABLE_NAME, null, values);
         db.close(); // Closing database connection
     }
-
+    //Initialize values for bank details in table3
     void firstAdd(String smsAccNo1) {
         SQLiteDatabase db = this.getWritableDatabase();
 
@@ -94,14 +96,49 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.insert(TABLE_NAME3, null, values);
         db.close();
     }
-
+    //Update Table3 values
     void Bank(String smsMsgStr1,String smsAccNo1,String mAmount1) {
         SQLiteDatabase db = this.getWritableDatabase();
-
+        String total="";
         ContentValues values = new ContentValues();
-        values.put(STATUS, smsMsgStr1.toString());
-        values.put(ACCOUNT_NO, smsAccNo1.toString());
-        values.put(AMOUNT, mAmount1.toString());
+        String selectQuery = "SELECT * FROM " + TABLE_NAME3 + " WHERE " + ACCOUNT_NO + " LIKE \"%" + smsAccNo1 + "%\" ";
+        Cursor cursor = db.rawQuery(selectQuery, null);
+        if(smsMsgStr1.equalsIgnoreCase("Debited")) {
+            String deb="";
+            float temp;
+            if (cursor.moveToFirst()) {
+                do {
+                    deb+=cursor.getString(3);
+                    temp = Float.parseFloat(deb.toString()) + Float.parseFloat(mAmount1.toString());
+                    deb="";
+                    deb+=String.valueOf(temp);
+                    values.put(DEBIT,deb);
+                    total+=cursor.getString(4);
+                    temp = Float.parseFloat(total.toString()) - Float.parseFloat(mAmount1.toString());
+                    values.put(TOTAL,temp);
+                    db.update(TABLE_NAME3,values,ACCOUNT_NO + " LIKE \"%" +smsAccNo1+ "%\"",null);
+                } while (cursor.moveToNext());
+            }
+        }
+        if(smsMsgStr1.equalsIgnoreCase("Credited")) {
+            String cre="";
+            float temp;
+            if (cursor.moveToFirst()) {
+                do {
+                    cre+=cursor.getString(2);
+                    temp = Float.parseFloat(cre.toString()) + Float.parseFloat(mAmount1.toString());
+                    cre="";
+                    cre+=String.valueOf(temp);
+                    values.put(CREDIT,cre);
+                    total+=cursor.getString(4);
+                    temp = Float.parseFloat(total.toString())+Float.parseFloat(mAmount1.toString());
+                    values.put(TOTAL,temp);
+                    db.update(TABLE_NAME3, values, ACCOUNT_NO + " LIKE \"%" + smsAccNo1 + "%\"", null);
+                } while (cursor.moveToNext());
+            }
+        }
+
+        db.close();
     }
 
     //Add Date to date table
@@ -121,8 +158,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.update(TABLE_NAME2, values, KEY_ID2 + " LIKE \"%1%\"", null);
         db.close();
     }
-
-    //Returns the last time
+    //Returns the last timestamp
     public ArrayList<String> Selected2() {
         ArrayList<String> DataList = new ArrayList<String>();
         // Select All Query
@@ -148,7 +184,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return DataList;
     }
 
-    //Returns transaction ata for specific banks
+    //Returns all transaction for specific banks
     public ArrayList<String> Selected3(String Account) {
         ArrayList<String> DataList = new ArrayList<String>();
         // Select All Query
@@ -177,30 +213,58 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         return DataList;
     }
 
-    //Reading entries from table 1
+    //Reading entries from table 3
     public ArrayList<String> getAllvalues() {
         ArrayList<String> DataList = new ArrayList<String>();
         // Select All Query
-        String selectQuery = "SELECT  * FROM " + TABLE_NAME;
+        String selectQuery = "SELECT  * FROM " + TABLE_NAME3;
 
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
 
-        String sta,acc,amo,id,Entry1;
+        String id,acc,cre,deb,tot,Entry1;
 
         // looping through all rows and adding to list
         if (cursor.moveToFirst()) {
             do {
                 Entry1 = "";
                 id="";
-                sta="";
+                cre="";
                 acc="";
-                amo="";
+                deb="";
+                tot="";
                 id+=cursor.getString(0);
-                sta+=cursor.getString(1);
-                acc+=cursor.getString(2);
-                amo+=cursor.getString(3);
-                Entry1+="\n "+id+" "+sta+" "+acc+" "+amo;
+                acc+=cursor.getString(1);
+                cre+=cursor.getString(2);
+                deb+=cursor.getString(3);
+                tot+=cursor.getString(4);
+                Entry1+="\n "+acc+
+                        "\n CREDITED : "+cre+
+                        "\n DEBITED : "+deb+
+                        "\n TOTAL : "+tot;
+                DataList.add(Entry1);
+            } while (cursor.moveToNext());
+        }
+        return DataList;
+    }
+    //Reading all account numbers
+    public ArrayList<String> Select4() {
+        ArrayList<String> DataList = new ArrayList<String>();
+        // Select All Query
+        String selectQuery = "SELECT  * FROM " + TABLE_NAME3;
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(selectQuery, null);
+
+        String acc,Entry1;
+
+        // looping through all rows and adding to list
+        if (cursor.moveToFirst()) {
+            do {
+                Entry1 = "";
+                acc="";
+                acc+=cursor.getString(1);
+                Entry1+=acc;
                 DataList.add(Entry1);
             } while (cursor.moveToNext());
         }

@@ -11,7 +11,6 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 import android.widget.Button;
@@ -84,12 +83,13 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
             public void onClick(View view) {
                 //For selected account number
                 arrayAdapter.clear();
-                for (int j = 0; j < accountI; j++) {
-                    ArrayList<String> Val = db.Selected(accountNumbers.get(j));
+                //for (int j = 0; j < accountI; j++) {
+                  //  ArrayList<String> Val = db.Selected(accountNumbers.get(j));
+               ArrayList<String> Val = db.getAllvalues();
                     for (int i = 0; i < Val.size(); i++) {
                         arrayAdapter.add(Val.get(i));
                    }
-                }
+                //}
             }
         });
 
@@ -104,17 +104,23 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
             db.AddFirstDate("0000000000000");
             StartApp=1;
         }
+        Val=db.Select4();
+        for(int j=0;j<Val.size();j++) {
+            accountNumbers.add(Val.get(j));
+            accountI++;
+        }
         refreshSmsInbox();
         ft=0;
         db.UpdateDate(PushTime);
         StartApp=0;
         arrayAdapter.clear();
-        for (int j = 0; j < accountI; j++) {
-            Val = db.Selected(accountNumbers.get(j));
+        //for (int j = 0; j < accountI; j++) {
+         //   Val = db.Selected(accountNumbers.get(j));
+        Val = db.getAllvalues();
             for (int i = 0; i < Val.size(); i++) {
                 arrayAdapter.add(Val.get(i));
             }
-        }
+       // }
     }
 
     public void refreshSmsInbox() {
@@ -178,6 +184,7 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
                     }
                     if (found != 1) {
                         accountNumbers.add(smsAccNo);
+                        //ArrayList<String> Val = db.Select4();
                         db.firstAdd(smsAccNo);
                         accountI++;
                     }
@@ -265,6 +272,8 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
 
         Toast.makeText(this, "Data Contain :\n|"+smsMessageStr+"\n|"+smsAccNo+"\n|"+mAmount, Toast.LENGTH_SHORT).show();
         db.add(smsMessageStr,smsAccNo,mAmount);
+        db.Bank(smsMessageStr,smsAccNo,mAmount);
+
 }
 
     public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
