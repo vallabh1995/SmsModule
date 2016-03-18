@@ -142,8 +142,8 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
             String Time = smsInboxCursor.getString(smsInboxCursor.getColumnIndex("date"));
             Long timestamp = Long.parseLong(Time);
             calendar.setTimeInMillis(timestamp);
-            //Date finalDate = calendar.getTime();
-            //String smsDate = finalDate.toString();
+            Date finalDate = calendar.getTime();
+            String smsDate = finalDate.toString();
             //str+="Date : "+smsDate+"\nTimeStamp : "+Time;
             SMS=Float.parseFloat(Time);
             smsMessage += smsInboxCursor.getString(indexBody).toLowerCase();
@@ -184,20 +184,19 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
                     }
                     if (found != 1) {
                         accountNumbers.add(smsAccNo);
-                        //ArrayList<String> Val = db.Select4();
                         db.firstAdd(smsAccNo);
                         accountI++;
                     }
 
                     if(StartApp==1) {
-                        AddEntry(smsMessage);
+                        AddEntry(smsMessage,smsDate);
                     }
                     else {
                         ArrayList<String> Val = db.Selected2();
                         String S1 = Val.get(Val.size() - 1);
                         DB = Float.parseFloat(S1);
                         if (SMS > DB) {
-                            AddEntry(smsMessage);
+                            AddEntry(smsMessage,smsDate);
                        }
                     }
                     break;
@@ -217,7 +216,7 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
         }
     }
 
-    public void AddEntry(String Message) {
+    public void AddEntry(String Message,String Time) {
         int a=0,b=0;
         smsMessage = ""; smsMessageStr= ""; mAmount = ""; smsAccNo = "";
 
@@ -269,10 +268,9 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
             b=smsMessage.indexOf(" ",a+4);
             mAmount += smsMessage.substring(a+4,b);
         }
-
         Toast.makeText(this, "Data Contain :\n|"+smsMessageStr+"\n|"+smsAccNo+"\n|"+mAmount, Toast.LENGTH_SHORT).show();
-        db.add(smsMessageStr,smsAccNo,mAmount);
-        db.Bank(smsMessageStr,smsAccNo,mAmount);
+        db.add(smsMessageStr, smsAccNo, mAmount, Time);
+        db.Bank(smsMessageStr, smsAccNo, mAmount);
 
 }
 

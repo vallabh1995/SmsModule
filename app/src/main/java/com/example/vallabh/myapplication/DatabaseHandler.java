@@ -20,6 +20,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public static final String STATUS = "credit_debit";
     public static final String AMOUNT = "amount";
     public static final String KEY_ID = "_id";
+    public static final String TIMESTAMP = "timestamp";
     public static final String CATEGORY = "category";
 
     //Column Name 2
@@ -45,6 +46,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 + STATUS + " TEXT, "
                 + ACCOUNT_NO + " TEXT, "
                 + AMOUNT + " TEXT, "
+                + TIMESTAMP + " TEXT, "
                 + CATEGORY + " TEXT)";
         db.execSQL(CREATE_CONTACTS_TABLE);
 
@@ -71,13 +73,14 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     }
 
     //Insert Row into Message table
-    void add(String smsMsgStr1, String smsAccNo1, String mAmount1) {
+    void add(String smsMsgStr1, String smsAccNo1, String mAmount1,String mTimeStamp) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
         values.put(STATUS, smsMsgStr1.toString());
         values.put(ACCOUNT_NO, smsAccNo1.toString());
         values.put(AMOUNT, mAmount1.toString());
+        values.put(TIMESTAMP,mTimeStamp.toString());
 
         // Inserting Row
         db.insert(TABLE_NAME, null, values);
@@ -193,7 +196,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
 
-        String sta,acc,amo,Entry1;
+        String sta,acc,amo,time,Entry1;
         int id=0;
         // looping through all rows and adding to list
         if (cursor.moveToFirst()) {
@@ -203,10 +206,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 sta="";
                 acc="";
                 amo="";
+                time="";
                 sta+=cursor.getString(1);
                 acc+=cursor.getString(2);
                 amo+=cursor.getString(3);
-                Entry1+="\n "+id+" "+sta+" "+acc+" "+amo;
+                time+=cursor.getString(4);
+                Entry1+="\n "+id+" "+sta+" "+amo+" "+time;
                 DataList.add(Entry1);
             } while (cursor.moveToNext());
         }
@@ -268,47 +273,6 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 DataList.add(Entry1);
             } while (cursor.moveToNext());
         }
-        return DataList;
-    }
-
-    //selecting data from specific account
-    public ArrayList<String> Selected(String Account) {
-        float Sum1=0,Sum2=0;
-        ArrayList<String> DataList = new ArrayList<String>();
-        //Select AMOUNT from table where status is CREDITED and account number matches
-        String selectQuery = "SELECT  "+ AMOUNT +" FROM " + TABLE_NAME + " WHERE " + ACCOUNT_NO + " LIKE \"" + Account + "\" AND "+ STATUS + " LIKE \"CREDITED\"";
-
-        SQLiteDatabase db = this.getWritableDatabase();
-        Cursor cursor = db.rawQuery(selectQuery, null);
-        String amo,Entry1;
-
-        // looping through all rows and adding to list
-        if (cursor.moveToFirst()) {
-            do {
-                amo="";
-                amo+=cursor.getString(0);
-                Sum1+=Float.parseFloat(amo.toString());
-            } while (cursor.moveToNext());
-
-        }
-
-        //Select AMOUNT from table where status is DEBITED and account number matches
-        selectQuery = "SELECT  "+ AMOUNT +" FROM " + TABLE_NAME + " WHERE " + ACCOUNT_NO + " LIKE \"" + Account + "\" AND "+ STATUS + " LIKE \"DEBITED\"";
-        cursor = db.rawQuery(selectQuery, null);
-
-        // looping through all rows and adding to list
-        if (cursor.moveToFirst()) {
-            do {
-                amo="";
-                amo+=cursor.getString(0);
-                Sum2+=Float.parseFloat(amo.toString());
-            } while (cursor.moveToNext());
-        }
-        Entry1="\n "+Account+
-                "\n CREDITED : "+Sum1+
-                "\n DEBITED : "+Sum2+
-                "\n Total : "+(Sum1-Sum2);
-        DataList.add(Entry1);
         return DataList;
     }
 }
