@@ -135,6 +135,7 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
         do {
             smsMessage = "";
             smsAccNo = "";
+            String month="",year="";
             float DB,SMS;
             String strAddress = smsInboxCursor.getString(indexAddress);
             //String str = "SMS From: " + smsInboxCursor.getString(indexAddress) +
@@ -142,9 +143,13 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
             String Time = smsInboxCursor.getString(smsInboxCursor.getColumnIndex("date"));
             Long timestamp = Long.parseLong(Time);
             calendar.setTimeInMillis(timestamp);
+
             Date finalDate = calendar.getTime();
             String smsDate = finalDate.toString();
+            month+=smsDate.substring(4,7);
+            year+=smsDate.substring(30,34);
             //str+="Date : "+smsDate+"\nTimeStamp : "+Time;
+
             SMS=Float.parseFloat(Time);
             smsMessage += smsInboxCursor.getString(indexBody).toLowerCase();
             if(ft==0){
@@ -189,14 +194,14 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
                     }
 
                     if(StartApp==1) {
-                        AddEntry(smsMessage,smsDate);
+                        AddEntry(smsMessage,month+" "+year);
                     }
                     else {
                         ArrayList<String> Val = db.Selected2();
                         String S1 = Val.get(Val.size() - 1);
                         DB = Float.parseFloat(S1);
                         if (SMS > DB) {
-                            AddEntry(smsMessage,smsDate);
+                            AddEntry(smsMessage,month+" "+year);
                        }
                     }
                     break;
