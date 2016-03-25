@@ -2,7 +2,6 @@ package com.example.vallabh.myapplication;
 
 import android.content.ContentResolver;
 
-import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -29,8 +28,8 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
     String smsMessage = "", smsMessageStr = "", mAmount = "", smsAccNo = "", ReadAcc = "";
     public int StartApp=0;
     /*BANK SMS ADDRESSES*/
-    public static int NoBank = 12;
-    public static String stringArray[] = {"8451043280", "VM-HDFCBK", "VM-BOIIND", "BP-SBIMBS", "BP-ATMSBI", "AM-HDFCBK", "VM-UnionB", "VM-UIICHO", "VM-CBSSBI", "VM-CorpBk", "VL-CENTBK", "VM-CENTBK", "BW-PNBSMS"};
+    public static int NoBank = 2;
+    public static String stringArray[] = {/*"8451043280", "VM-HDFCBK", "VM-BOIIND", "BP-SBIMBS", "BP-ATMSBI", "AM-HDFCBK", "VM-UnionB", "VM-UIICHO", "VM-CBSSBI", "VM-CorpBk", "VL-CENTBK", "VM-CENTBK", "BW-PNBSMS",*/"VK-BOIIND","VM-CBSSBI","VM-BOIIND"};/*,"BZ-ATMSBI","BP-ATMSBI","BX-ATMSBI"};*/
     /*ACCOUNT NUMBER*/
     public ArrayList<String> accountNumbers = new ArrayList<String>();
     public int accountI = 0,ft;
@@ -178,15 +177,25 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
                         b = smsMessage.indexOf(" ", a + 8);
                         smsAccNo += smsMessage.substring(a + 8, b);
                     }
+                    else if (smsMessage.contains("ac")) {
+                        a = smsMessage.indexOf("ac");
+                        b = smsMessage.indexOf(" ", a + 3);
+                        smsAccNo += smsMessage.substring(a + 3, b);
+                    }
                     int found = 0;
                     String Temp = "";
                     for (int j = 0; j < accountI; j++) {
                         Temp = accountNumbers.get(j);
-                        if (Temp.equalsIgnoreCase(smsAccNo)) {
+                        if (Temp.contains(smsAccNo)) {
+                            found = 1;
+                            break;
+                        }
+                        else if(smsAccNo.contains(Temp)){
                             found = 1;
                             break;
                         }
                     }
+
                     if (found != 1) {
                         accountNumbers.add(smsAccNo);
                         db.firstAdd(smsAccNo);
@@ -256,6 +265,11 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
             b=smsMessage.indexOf(" ",a+8);
             smsAccNo += smsMessage.substring(a+8,b);
         }
+        else if (smsMessage.contains("ac")) {
+            a = smsMessage.indexOf("ac");
+            b = smsMessage.indexOf(" ", a + 3);
+            smsAccNo += smsMessage.substring(a + 3, b);
+        }
 
         //Amount
         if(smsMessage.contains("rs.")) {
@@ -273,10 +287,12 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
             b=smsMessage.indexOf(" ",a+4);
             mAmount += smsMessage.substring(a+4,b);
         }
-        Toast.makeText(this, "Data Contain :\n|"+smsMessageStr+"\n|"+smsAccNo+"\n|"+mAmount, Toast.LENGTH_SHORT).show();
-        db.add(smsMessageStr, smsAccNo, mAmount, Time);
-        db.Bank(smsMessageStr, smsAccNo, mAmount);
-
+        String mAmount2 = mAmount.replace(",","");
+        Toast.makeText(this, "Data Contain :\n|"+smsMessageStr+"|\n|"+smsAccNo+"|\n|"+mAmount2+"|", Toast.LENGTH_SHORT).show();
+        if(smsMessageStr!="" && smsAccNo!="" && mAmount2!="") {
+            db.add(smsMessageStr, smsAccNo, mAmount2, Time);
+            db.Bank(smsMessageStr, smsAccNo, mAmount2);
+        }
 }
 
     public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
@@ -291,7 +307,6 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
             b=ClickedItem.indexOf(" ",a+2);
             Acc+=ClickedItem.substring(a+1, b);
 
-           // Toast.makeText(this, "Message : |"+Acc+"|", Toast.LENGTH_SHORT).show();
             ArrayList<String> Val = db.Selected3(Acc);
             arrayAdapter.clear();
             for (int i = 0; i < Val.size(); i++) {

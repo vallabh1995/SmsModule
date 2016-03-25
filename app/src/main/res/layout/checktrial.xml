@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+
+    <CheckBox
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Show/Hide Textbox"
+        android:id="@+id/checkBoxTrial1"
+        android:layout_marginTop="10dp"
+        android:layout_centerHorizontal="true" />
+
+    <EditText
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/checkBoxTrialText"
+        android:layout_below="@+id/checkBoxTrial1"
+        android:layout_alignRight="@+id/checkBoxTrial1"
+        android:layout_alignEnd="@+id/checkBoxTrial1"
+        android:layout_alignLeft="@+id/checkBoxTrial1"
+        android:layout_alignStart="@+id/checkBoxTrial1" />
+</RelativeLayout>

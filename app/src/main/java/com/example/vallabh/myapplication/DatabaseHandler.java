@@ -111,12 +111,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             float temp;
             if (cursor.moveToFirst()) {
                 do {
-                    deb+=cursor.getString(3);
+                    deb=cursor.getString(3);
                     temp = Float.parseFloat(deb.toString()) + Float.parseFloat(mAmount1.toString());
                     deb="";
                     deb+=String.valueOf(temp);
                     values.put(DEBIT,deb);
-                    total+=cursor.getString(4);
+                    total=cursor.getString(4);
                     temp = Float.parseFloat(total.toString()) - Float.parseFloat(mAmount1.toString());
                     values.put(TOTAL,temp);
                     db.update(TABLE_NAME3,values,ACCOUNT_NO + " LIKE \"%" +smsAccNo1+ "%\"",null);
@@ -128,19 +128,18 @@ public class DatabaseHandler extends SQLiteOpenHelper {
             float temp;
             if (cursor.moveToFirst()) {
                 do {
-                    cre+=cursor.getString(2);
+                    cre=cursor.getString(2);
                     temp = Float.parseFloat(cre.toString()) + Float.parseFloat(mAmount1.toString());
                     cre="";
                     cre+=String.valueOf(temp);
                     values.put(CREDIT,cre);
-                    total+=cursor.getString(4);
+                    total=cursor.getString(4);
                     temp = Float.parseFloat(total.toString())+Float.parseFloat(mAmount1.toString());
                     values.put(TOTAL,temp);
                     db.update(TABLE_NAME3, values, ACCOUNT_NO + " LIKE \"%" + smsAccNo1 + "%\"", null);
                 } while (cursor.moveToNext());
             }
         }
-
         db.close();
     }
 
@@ -191,7 +190,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public ArrayList<String> Selected3(String Account) {
         ArrayList<String> DataList = new ArrayList<String>();
         // Select All Query
-        String selectQuery = "SELECT  * FROM " + TABLE_NAME+ " WHERE " + ACCOUNT_NO + " LIKE \"" + Account+"\"";
+        String selectQuery = "SELECT  * FROM " + TABLE_NAME + " WHERE " + ACCOUNT_NO + " LIKE \"%" + Account+"%\"";
 
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
