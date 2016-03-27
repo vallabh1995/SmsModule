@@ -28,8 +28,8 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
     String smsMessage = "", smsMessageStr = "", mAmount = "", smsAccNo = "", ReadAcc = "";
     public int StartApp=0;
     /*BANK SMS ADDRESSES*/
-    public static int NoBank = 2;
-    public static String stringArray[] = {/*"8451043280", "VM-HDFCBK", "VM-BOIIND", "BP-SBIMBS", "BP-ATMSBI", "AM-HDFCBK", "VM-UnionB", "VM-UIICHO", "VM-CBSSBI", "VM-CorpBk", "VL-CENTBK", "VM-CENTBK", "BW-PNBSMS",*/"VK-BOIIND","VM-CBSSBI","VM-BOIIND"};/*,"BZ-ATMSBI","BP-ATMSBI","BX-ATMSBI"};*/
+    public static int NoBank = 16;
+    public static String stringArray[] = {"8451043280", "VM-HDFCBK", "VM-BOIIND", "BP-SBIMBS", "AM-HDFCBK", "VM-UnionB", "VM-UIICHO", "VM-CBSSBI", "VM-CorpBk", "VL-CENTBK", "VM-CENTBK", "BW-PNBSMS","VK-BOIIND","VM-CBSSBI","VM-BOIIND","BZ-ATMSBI","VK-AxisBk"};
     /*ACCOUNT NUMBER*/
     public ArrayList<String> accountNumbers = new ArrayList<String>();
     public int accountI = 0,ft;
@@ -53,29 +53,29 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sms);
 
-        /*
-        /* Button for Database
-        Button But1 = (Button) findViewById(R.id.buttonDb);
-        But1.setOnClickListener(new AdapterView.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                ArrayList<String> Val = db.getAllvalues();
-                arrayAdapter.clear();
-                for (int i = 0; i < Val.size(); i++) {
-                    arrayAdapter.add(Val.get(i));
+            /*
+            /* Button for Database
+            Button But1 = (Button) findViewById(R.id.buttonDb);
+            But1.setOnClickListener(new AdapterView.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    ArrayList<String> Val = db.getAllvalues();
+                    arrayAdapter.clear();
+                    for (int i = 0; i < Val.size(); i++) {
+                        arrayAdapter.add(Val.get(i));
+                    }
                 }
-            }
-        });
+            });
 
-        /* Button for Messages
-        Button But2 = (Button) findViewById(R.id.messages);
-        But2.setOnClickListener(new AdapterView.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                refreshSmsInbox();
-            }
-        });
-        */
+            /* Button for Messages
+            Button But2 = (Button) findViewById(R.id.messages);
+            But2.setOnClickListener(new AdapterView.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    refreshSmsInbox();
+                }
+            });
+            */
         Button But3 = (Button) findViewById(R.id.submit);
         But3.setOnClickListener(new AdapterView.OnClickListener() {
             @Override
@@ -166,7 +166,7 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
                         smsAccNo += smsMessage.substring(a + 7, b);
                     } else if (smsMessage.contains("a/c")) {
                         a = smsMessage.indexOf("a/c");
-                        b = smsMessage.indexOf(" ", a + 4);
+                        b = smsMessage.indexOf(" ", a +9);
                         smsAccNo += smsMessage.substring(a + 4, b);
                     } else if (smsMessage.contains("account number")) {
                         a = smsMessage.indexOf("account");
@@ -176,12 +176,13 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
                         a = smsMessage.indexOf("account");
                         b = smsMessage.indexOf(" ", a + 8);
                         smsAccNo += smsMessage.substring(a + 8, b);
-                    }
-                    else if (smsMessage.contains("ac")) {
+                    } else if (smsMessage.contains("ac")) {
                         a = smsMessage.indexOf("ac");
                         b = smsMessage.indexOf(" ", a + 3);
                         smsAccNo += smsMessage.substring(a + 3, b);
                     }
+                    String smsAccNo2=smsAccNo.replace("x","");
+                    smsAccNo=smsAccNo2.replace(" ","");
                     int found = 0;
                     String Temp = "";
                     for (int j = 0; j < accountI; j++) {
@@ -198,6 +199,17 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
 
                     if (found != 1) {
                         accountNumbers.add(smsAccNo);
+                        /*if(smsMessage.contains("balance"))
+                        {
+                            String Bal="";
+                            a=smsMessage.indexOf("balance");
+                            b=smsMessage.indexOf(" ",a+8);
+                            Bal+=smsMessage.substring(a, b);
+                            Toast.makeText(this, "Data : "+Bal, Toast.LENGTH_SHORT);
+                        }
+                        else
+                        {..
+                        }*/
                         db.firstAdd(smsAccNo);
                         accountI++;
                     }
@@ -252,7 +264,7 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
         }
         else if(smsMessage.contains("a/c")) {
             a=smsMessage.indexOf("a/c");
-            b=smsMessage.indexOf(" ",a+4);
+            b=smsMessage.indexOf(" ",a+9);
             smsAccNo  += smsMessage.substring(a+4,b);
         }
         else if(smsMessage.contains("account number")) {
@@ -270,6 +282,8 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
             b = smsMessage.indexOf(" ", a + 3);
             smsAccNo += smsMessage.substring(a + 3, b);
         }
+        String smsAccNo2=smsAccNo.replace("x","");
+        smsAccNo=smsAccNo2.replace(" ","");
 
         //Amount
         if(smsMessage.contains("rs.")) {
@@ -289,7 +303,7 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
         }
         String mAmount2 = mAmount.replace(",","");
         Toast.makeText(this, "Data Contain :\n|"+smsMessageStr+"|\n|"+smsAccNo+"|\n|"+mAmount2+"|", Toast.LENGTH_SHORT).show();
-        if(smsMessageStr!="" && smsAccNo!="" && mAmount2!="") {
+        if(smsMessageStr.length()!=0 && smsAccNo.length()!=0 && mAmount2.length()!=0) {
             db.add(smsMessageStr, smsAccNo, mAmount2, Time);
             db.Bank(smsMessageStr, smsAccNo, mAmount2);
         }
@@ -299,6 +313,7 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
         try {
             String[] smsMessages = smsMessagesList.get(pos).split("\n");
             String ClickedItem="",Acc="";
+            String _id,amo,time,sta,temp;
             int a=0,b=0;
             for (int i = 1; i < smsMessages.length; ++i) {
                 ClickedItem += smsMessages[i];
@@ -306,11 +321,21 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
             a=ClickedItem.indexOf(" ");
             b=ClickedItem.indexOf(" ",a+2);
             Acc+=ClickedItem.substring(a+1, b);
-
+            Toast.makeText(this,"Acc : |"+Acc+"|",Toast.LENGTH_SHORT);
             ArrayList<String> Val = db.Selected3(Acc);
             arrayAdapter.clear();
             for (int i = 0; i < Val.size(); i++) {
-                arrayAdapter.add(Val.get(i));
+                temp=Val.get(i);
+                a=temp.indexOf(" ");
+                b=temp.indexOf(" ", a + 2);
+                _id=temp.substring(a + 1, b);
+                a=temp.indexOf(" ", b + 2);
+                sta=temp.substring(b + 1, a);
+                b=temp.indexOf(" ", a + 2);
+                amo=temp.substring(a + 1, b);
+                time=temp.substring(b + 1);
+                String Tm="\n|" +_id+ "|\n|" + sta + "|\n|" + amo + "|\n|" + time + "|";
+                arrayAdapter.add(Tm);
             }
 
         } catch (Exception e) {
