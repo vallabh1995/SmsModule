@@ -12,7 +12,7 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
     public static final String SMS_BUNDLE = "pdu";
 
     public void onReceive(Context context, Intent intent) {
-        Bundle intentExtras = intent.getExtras();
+        /*Bundle intentExtras = intent.getExtras();
         if (intentExtras != null) {
             Object[] sms = (Object[]) intentExtras.get(SMS_BUNDLE);
             String smsMessageStr = "";
@@ -30,6 +30,6 @@ public class SmsBroadcastReceiver extends BroadcastReceiver {
             Toast.makeText(context, smsMessageStr, Toast.LENGTH_SHORT).show();
 
             inst.updateList(smsMessageStr,address);
-        }
+        }*/
     }
 }

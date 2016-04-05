@@ -73,14 +73,15 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     }
 
     //Insert Row into Message table
-    void add(String smsMsgStr1, String smsAccNo1, String mAmount1,String mTimeStamp) {
+    void add(String smsMsgStr1, String smsAccNo1, String mAmount1,String mTimeStamp,String Cat) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
         values.put(STATUS, smsMsgStr1.toString());
         values.put(ACCOUNT_NO, smsAccNo1.toString());
         values.put(AMOUNT, mAmount1.toString());
-        values.put(TIMESTAMP,mTimeStamp.toString());
+        values.put(TIMESTAMP, mTimeStamp.toString());
+        values.put(CATEGORY,Cat.toString());
 
         // Inserting Row
         db.insert(TABLE_NAME, null, values);
@@ -158,6 +159,14 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         ContentValues values = new ContentValues();
         values.put(TIME, Data);
         db.update(TABLE_NAME2, values, KEY_ID2 + " LIKE \"%1%\"", null);
+        db.close();
+    }
+    void UpdateTotal(String Acc, String Amo)
+    {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(TOTAL, Amo);
+        db.update(TABLE_NAME3,values, ACCOUNT_NO + " LIKE \"%" + Acc + "%\"",null);
         db.close();
     }
     //Returns the last timestamp

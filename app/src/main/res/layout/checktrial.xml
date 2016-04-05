@@ -13,10 +13,23 @@
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:inputType="number|numberDecimal"
         android:id="@+id/checkBoxTrialText"
+        android:visibility="visible"
         android:layout_below="@+id/checkBoxTrial1"
         android:layout_alignRight="@+id/checkBoxTrial1"
         android:layout_alignEnd="@+id/checkBoxTrial1"
         android:layout_alignLeft="@+id/checkBoxTrial1"
         android:layout_alignStart="@+id/checkBoxTrial1" />
+
+    <Spinner
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/checkBoxSpinner"
+        android:layout_marginTop="8dp"
+        android:layout_below="@+id/checkBoxTrialText"
+        android:layout_alignLeft="@+id/checkBoxTrialText"
+        android:layout_alignStart="@+id/checkBoxTrialText"
+        android:layout_alignRight="@+id/checkBoxTrialText"
+        android:layout_alignEnd="@+id/checkBoxTrialText" />
 </RelativeLayout>

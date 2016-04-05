@@ -1,16 +1,22 @@
 package com.example.vallabh.myapplication;
 
+import android.app.AlertDialog;
 import android.content.ContentResolver;
 
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.Toast;
 import android.widget.Button;
 import java.util.ArrayList;
@@ -22,6 +28,7 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
     private static SmsActivity inst;
     ArrayList<String> smsMessagesList = new ArrayList<String>();
     ListView smsListView;
+    String categoryG;
     ArrayAdapter arrayAdapter;
     /*DATABASE HANDLES*/
     final DatabaseHandler db = new DatabaseHandler(this);
@@ -123,6 +130,8 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
     }
 
     public void refreshSmsInbox() {
+        String Balance="";
+        int balA=0;
         ContentResolver contentResolver = getContentResolver();
         Cursor smsInboxCursor = contentResolver.query(Uri.parse("content://sms/inbox"), null, null, null, null);
         int indexBody = smsInboxCursor.getColumnIndex("body");
@@ -231,81 +240,95 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
         } while (smsInboxCursor.moveToNext());
     }
 
+
     public void updateList(final String smsMessage, final String strAddress2) {
-        int i;
+        /*int i;
         for (i = 0; i <= NoBank; i++) {
             if (stringArray[i].equalsIgnoreCase(strAddress2)) {
-                arrayAdapter.insert(smsMessage, 0);
-                arrayAdapter.notifyDataSetChanged();
+
+                Toast.makeText(this,"smsMessage : "+smsMessage +" add : " + strAddress2,Toast.LENGTH_SHORT);
+
                 break;
             }
-        }
+        }*/
     }
 
     public void AddEntry(String Message,String Time) {
-        int a=0,b=0;
-        smsMessage = ""; smsMessageStr= ""; mAmount = ""; smsAccNo = "";
-
-        smsMessage+=Message;
+        int a = 0, b = 0;
+        smsMessage = "";
+        smsMessageStr = "";
+        String Category="";
+        mAmount = "";
+        smsAccNo = "";
+        String Balance="";
+        int balA=0;
+        smsMessage += Message;
 
         //Status
-        if(smsMessage.contains("credited")) {
-            smsMessageStr +="Credited";
-        }
-        else if(smsMessage.contains("debited") || smsMessage.contains("withdraw")) {
-            smsMessageStr +="Debited";
+        if (smsMessage.contains("credited")) {
+            smsMessageStr += "Credited";
+        } else if (smsMessage.contains("debited") || smsMessage.contains("withdraw")) {
+            smsMessageStr += "Debited";
         }
 
         //AccountNumber
-        if(smsMessage.contains("a/c no.")) {
-            a=smsMessage.indexOf("a/c");
-            b=smsMessage.indexOf(" ",a+8);
-            smsAccNo  += smsMessage.substring(a+7,b);
-        }
-        else if(smsMessage.contains("a/c")) {
-            a=smsMessage.indexOf("a/c");
-            b=smsMessage.indexOf(" ",a+9);
-            smsAccNo  += smsMessage.substring(a+4,b);
-        }
-        else if(smsMessage.contains("account number")) {
-            a=smsMessage.indexOf("account");
-            b=smsMessage.indexOf(" ",a+15);
-            smsAccNo += smsMessage.substring(a+15,b);
-        }
-        else if (smsMessage.contains("account")) {
-            a=smsMessage.indexOf("account");
-            b=smsMessage.indexOf(" ",a+8);
-            smsAccNo += smsMessage.substring(a+8,b);
-        }
-        else if (smsMessage.contains("ac")) {
+        if (smsMessage.contains("a/c no.")) {
+            a = smsMessage.indexOf("a/c");
+            b = smsMessage.indexOf(" ", a + 8);
+            smsAccNo += smsMessage.substring(a + 7, b);
+        } else if (smsMessage.contains("a/c")) {
+            a = smsMessage.indexOf("a/c");
+            b = smsMessage.indexOf(" ", a + 9);
+            smsAccNo += smsMessage.substring(a + 4, b);
+        } else if (smsMessage.contains("account number")) {
+            a = smsMessage.indexOf("account");
+            b = smsMessage.indexOf(" ", a + 15);
+            smsAccNo += smsMessage.substring(a + 15, b);
+        } else if (smsMessage.contains("account")) {
+            a = smsMessage.indexOf("account");
+            b = smsMessage.indexOf(" ", a + 8);
+            smsAccNo += smsMessage.substring(a + 8, b);
+        } else if (smsMessage.contains("ac")) {
             a = smsMessage.indexOf("ac");
             b = smsMessage.indexOf(" ", a + 3);
             smsAccNo += smsMessage.substring(a + 3, b);
         }
-        String smsAccNo2=smsAccNo.replace("x","");
-        smsAccNo=smsAccNo2.replace(" ","");
+        String smsAccNo2 = smsAccNo.replace("x", "");
+        smsAccNo = smsAccNo2.replace(" ", "");
 
         //Amount
-        if(smsMessage.contains("rs.")) {
-            a=smsMessage.indexOf("rs.");
-            b=smsMessage.indexOf(" ",a+4);
-            mAmount += smsMessage.substring(a+4,b);
+        if (smsMessage.contains("rs.")) {
+            a = smsMessage.indexOf("rs.");
+            b = smsMessage.indexOf(" ", a + 4);
+            mAmount += smsMessage.substring(a + 4, b);
+        } else if (smsMessage.contains("rs")) {
+            a = smsMessage.indexOf("rs");
+            b = smsMessage.indexOf(" ", a + 4);
+            mAmount += smsMessage.substring(a + 3, b);
+        } else if (smsMessage.contains("inr")) {
+            a = smsMessage.indexOf("inr");
+            b = smsMessage.indexOf(" ", a + 4);
+            mAmount += smsMessage.substring(a + 4, b);
         }
-        else if(smsMessage.contains("rs")) {
-            a=smsMessage.indexOf("rs");
-            b=smsMessage.indexOf(" ",a+4);
-            mAmount += smsMessage.substring(a+3,b);
+
+        //Balance
+        if (smsMessage.contains("balance "))
+        {
+            a=smsMessage.indexOf("balance ");
+            b=smsMessage.indexOf(".",a+8);
+            Balance +=smsMessage.substring(a + 8, b + 2);
+            balA=1;
         }
-        else if(smsMessage.contains("inr")) {
-            a=smsMessage.indexOf("inr");
-            b=smsMessage.indexOf(" ",a+4);
-            mAmount += smsMessage.substring(a+4,b);
-        }
+
         String mAmount2 = mAmount.replace(",","");
-        Toast.makeText(this, "Data Contain :\n|"+smsMessageStr+"|\n|"+smsAccNo+"|\n|"+mAmount2+"|", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Data Contain :\n|"+smsMessageStr+"|\n|"+smsAccNo+"|\n|"+mAmount2, Toast.LENGTH_SHORT).show();
         if(smsMessageStr.length()!=0 && smsAccNo.length()!=0 && mAmount2.length()!=0) {
-            db.add(smsMessageStr, smsAccNo, mAmount2, Time);
+            db.add(smsMessageStr, smsAccNo, mAmount2, Time,Category);
             db.Bank(smsMessageStr, smsAccNo, mAmount2);
+            if(balA==1) {
+                Toast.makeText(this, "Balance : "+Balance,Toast.LENGTH_SHORT).show();
+              //  db.UpdateTotal(smsAccNo,Balance);
+            }
         }
 }
 
