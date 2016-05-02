@@ -3,17 +3,22 @@ package com.example.vallabh.myapplication;
 import android.app.AlertDialog;
 import android.content.ContentResolver;
 
+import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Spinner;
@@ -28,22 +33,31 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
     private static SmsActivity inst;
     ArrayList<String> smsMessagesList = new ArrayList<String>();
     ListView smsListView;
-    String categoryG;
     ArrayAdapter arrayAdapter;
     /*DATABASE HANDLES*/
     final DatabaseHandler db = new DatabaseHandler(this);
-    String smsMessage = "", smsMessageStr = "", mAmount = "", smsAccNo = "", ReadAcc = "";
-    public int StartApp=0;
+    String smsMessage = "", smsMessageStr = "", mAmount = "", smsAccNo = "", ReadAcc = "", categoryG, textAmount = "", leftAmount = "";
+    String mAmount2 = "", balanceTemp = "";
+    public int StartApp=0, balA;
     /*BANK SMS ADDRESSES*/
-    public static int NoBank = 16;
-    public static String stringArray[] = {"8451043280", "VM-HDFCBK", "VM-BOIIND", "BP-SBIMBS", "AM-HDFCBK", "VM-UnionB", "VM-UIICHO", "VM-CBSSBI", "VM-CorpBk", "VL-CENTBK", "VM-CENTBK", "BW-PNBSMS","VK-BOIIND","VM-CBSSBI","VM-BOIIND","BZ-ATMSBI","VK-AxisBk"};
+    public static int NoBank = 15;
+    //public static String stringArray[] = {"BP-ATMSBI","BZ-ATMSBI","BX-ATMSBI","VK-CorpBK"};
+    public static String stringArray[] = {/*"8451043280", */"VM-HDFCBK", "VM-BOIIND", "BP-SBIMBS", "AM-HDFCBK", "VM-UnionB", "VM-UIICHO", "VM-CBSSBI", "VM-CorpBk", "VL-CENTBK", "VM-CENTBK", "BW-PNBSMS","VK-BOIIND","VM-CBSSBI","VM-BOIIND","BZ-ATMSBI","VK-AxisBk"};
     /*ACCOUNT NUMBER*/
     public ArrayList<String> accountNumbers = new ArrayList<String>();
     public int accountI = 0,ft;
     public String PushTime;
     /*CALENDER*/
     Calendar calendar = Calendar.getInstance();
-
+    //Alertbox
+    AlertDialog.Builder build;
+    EditText transAmount;
+    Spinner spinnerCat;
+    private DbHelperCategory cHelper;
+    private SQLiteDatabase tDataBase, cDataBase;
+    AlertDialog alert;
+    String[] defaultCat = {"Lifestyle","Entertainment","Misc."};
+    int catgyFlag;
 
     public static SmsActivity instance() {
         return inst;
@@ -59,6 +73,29 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sms);
+
+        cHelper = new DbHelperCategory(this);
+        cDataBase = cHelper.getWritableDatabase();
+
+        // populate category Database
+        Cursor gCursor = cDataBase.rawQuery("SELECT * FROM " + DbHelperCategory.TABLE_NAME, null);
+        String dbData = null;
+
+        catgyFlag = 0;
+
+        if(gCursor.getCount() > 0)
+            catgyFlag = 1;
+
+        if(catgyFlag == 0){
+            ContentValues values = new ContentValues();
+            for(int x = 0; x < defaultCat.length; x++){
+                values.put(DbHelperCategory.CAT_TYPE, defaultCat[x]);
+                cDataBase.insert(DbHelperCategory.TABLE_NAME, null, values);
+            }
+            cDataBase.close();
+        }
+
+
 
             /*
             /* Button for Database
@@ -192,6 +229,13 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
                     }
                     String smsAccNo2=smsAccNo.replace("x","");
                     smsAccNo=smsAccNo2.replace(" ","");
+                    char AA='a';
+                    for(int d=0;d<26;d++)
+                    {
+                        smsAccNo2=smsAccNo.replace(String.valueOf(AA),"");
+                        smsAccNo=smsAccNo2;
+                        AA++;
+                    }
                     int found = 0;
                     String Temp = "";
                     for (int j = 0; j < accountI; j++) {
@@ -208,17 +252,6 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
 
                     if (found != 1) {
                         accountNumbers.add(smsAccNo);
-                        /*if(smsMessage.contains("balance"))
-                        {
-                            String Bal="";
-                            a=smsMessage.indexOf("balance");
-                            b=smsMessage.indexOf(" ",a+8);
-                            Bal+=smsMessage.substring(a, b);
-                            Toast.makeText(this, "Data : "+Bal, Toast.LENGTH_SHORT);
-                        }
-                        else
-                        {..
-                        }*/
                         db.firstAdd(smsAccNo);
                         accountI++;
                     }
@@ -257,17 +290,17 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
         int a = 0, b = 0;
         smsMessage = "";
         smsMessageStr = "";
-        String Category="";
+        String Category = "";
         mAmount = "";
         smsAccNo = "";
-        String Balance="";
-        int balA=0;
+        String Balance = "";
+        balA = 0;
         smsMessage += Message;
 
         //Status
         if (smsMessage.contains("credited")) {
             smsMessageStr += "Credited";
-        } else if (smsMessage.contains("debited") || smsMessage.contains("withdraw")) {
+        } else if (smsMessage.contains("debited") || smsMessage.contains("withdraw") || smsMessage.contains("withdrawal") || smsMessage.contains("deducted")) {
             smsMessageStr += "Debited";
         }
 
@@ -293,8 +326,15 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
             b = smsMessage.indexOf(" ", a + 3);
             smsAccNo += smsMessage.substring(a + 3, b);
         }
-        String smsAccNo2 = smsAccNo.replace("x", "");
-        smsAccNo = smsAccNo2.replace(" ", "");
+        String smsAccNo2=smsAccNo.replace("x","");
+        smsAccNo=smsAccNo2.replace(" ","");
+        char AA='a';
+        for(int d=0;d<26;d++)
+        {
+            smsAccNo2=smsAccNo.replace(String.valueOf(AA),"");
+            smsAccNo=smsAccNo2;
+            AA++;
+        }
 
         //Amount
         if (smsMessage.contains("rs.")) {
@@ -304,6 +344,7 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
         } else if (smsMessage.contains("rs")) {
             a = smsMessage.indexOf("rs");
             b = smsMessage.indexOf(" ", a + 4);
+            if(b<0){b=smsMessage.indexOf(".",a+4);}
             mAmount += smsMessage.substring(a + 3, b);
         } else if (smsMessage.contains("inr")) {
             a = smsMessage.indexOf("inr");
@@ -312,39 +353,114 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
         }
 
         //Balance
-        if (smsMessage.contains("balance "))
-        {
-            a=smsMessage.indexOf("balance ");
-            b=smsMessage.indexOf(".",a+8);
-            Balance +=smsMessage.substring(a + 8, b + 2);
-            balA=1;
+        if (smsMessage.contains("balance ")) {
+            a = smsMessage.indexOf("balance ");
+            b = smsMessage.indexOf(".", a + 8);
+            Balance += smsMessage.substring(a + 8, b + 2);
+            balA = 1;
         }
 
-        String mAmount2 = mAmount.replace(",","");
-        Toast.makeText(this, "Data Contain :\n|"+smsMessageStr+"|\n|"+smsAccNo+"|\n|"+mAmount2, Toast.LENGTH_SHORT).show();
-        if(smsMessageStr.length()!=0 && smsAccNo.length()!=0 && mAmount2.length()!=0) {
-            db.add(smsMessageStr, smsAccNo, mAmount2, Time,Category);
-            db.Bank(smsMessageStr, smsAccNo, mAmount2);
-            if(balA==1) {
-                Toast.makeText(this, "Balance : "+Balance,Toast.LENGTH_SHORT).show();
-              //  db.UpdateTotal(smsAccNo,Balance);
+        mAmount2 = mAmount.replace(",", "");
+        if (smsMessageStr.length() != 0 && smsAccNo.length() != 0 && mAmount2.length() != 0) {
+            /*
+            ------------------1---------------------------
+            */
+
+            db.add(smsMessageStr, smsAccNo, mAmount2, Time, " Misc.");
+
+            ArrayList<String> Val=db.Select4();
+            int j;
+            for(j=0;j<Val.size();j++) {
+                String Temp=Val.get(j);
+                if(Temp.contains(smsAccNo2)) {
+                    Toast.makeText(this,"Status : "+smsMessageStr+"\n Acc : |"+Temp+"|\n Amo : "+mAmount2,Toast.LENGTH_LONG).show();
+                    db.Bank(smsMessageStr, Temp, mAmount2);
+                    break;
+                }
+                else if(smsAccNo2.contains(Temp)) {
+                    Toast.makeText(this,"Status : "+smsMessageStr+"\n Acc : |"+Temp+"|\n Amo : "+mAmount2,Toast.LENGTH_LONG).show();
+                    db.Bank(smsMessageStr, Temp, mAmount2);
+                    break;
+                }
+            }
+            if(Val.size()==j) {
+                Toast.makeText(this,"Status : "+smsMessageStr+"\n Acc : "+smsAccNo+"\n Amo : "+mAmount2,Toast.LENGTH_LONG).show();
+                db.Bank(smsMessageStr, smsAccNo, mAmount2);
+            }
+            if (balA == 1) {
+                //Toast.makeText(this, "Balance : " + Balance, Toast.LENGTH_SHORT).show();
+                //  db.UpdateTotal(smsAccNo,Balance);
             }
         }
-}
+    }
+
+    public void categoryFunc(){ //category DropDown
+        ArrayList<Integer> catId = new ArrayList<Integer>();
+        ArrayList<String> catCont = new ArrayList<String>();
+        cDataBase = cHelper.getReadableDatabase();
+        Cursor gCursor = cDataBase.rawQuery("SELECT * FROM "+ DbHelperCategory.TABLE_NAME, null);
+
+        catId.add(-1);
+        catCont.add("--Select Category--");
+
+        if(gCursor.moveToFirst()){
+            do{
+                catId.add(gCursor.getInt(gCursor.getColumnIndex(DbHelperCategory.KEY_ID)));
+                catCont.add(gCursor.getString(gCursor.getColumnIndex(DbHelperCategory.CAT_TYPE)));
+            }while(gCursor.moveToNext());
+        }
+        gCursor.close();
+        cDataBase.close();//close database
+
+        ArrayAdapter<String> adapterC = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, catCont);
+        //SimpleCursorAdapter adapterC = new SimpleCursorAdapter(this, android.R.layout.simple_spinner_item, gCursor, catCont, catId);
+        adapterC.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerCat.setAdapter(adapterC);
+        spinnerCat.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                cDataBase = cHelper.getWritableDatabase();
+                Cursor gCursor;
+                categoryG = "";
+                if (position != 0) {
+                    if (Build.VERSION.SDK_INT > 15) {
+                        gCursor = cDataBase.rawQuery("SELECT * FROM " + DbHelperCategory.TABLE_NAME + " WHERE " + DbHelperCategory.CAT_TYPE + "=?", new String[]{spinnerCat.getSelectedItem().toString()}, null);
+                    } else {
+                        gCursor = cDataBase.rawQuery("SELECT * FROM " + DbHelperCategory.TABLE_NAME, null);
+                    }
+                    //gCursor = dataBase.rawQuery("SELECT * FROM " + DbHelperCategory.TABLE_NAME + " WHERE " + DbHelperCategory.CAT_TYPE + " = " + spinnerCat.getSelectedItem().toString(), null);
+                    //categoryG = "";
+                    if (gCursor.moveToFirst()) {
+                        do {
+                            categoryG = gCursor.getString(gCursor.getColumnIndex(DbHelperCategory.CAT_TYPE));
+                        } while (gCursor.moveToNext());
+                    }
+                    gCursor.close();
+                }
+                cDataBase.close();
+            }
+            //Spinner spinnerCat = (Spinner) findViewById(R.id.categoryDrop);
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                //
+            }
+        });
+    }
 
     public void onItemClick(AdapterView<?> parent, View view, int pos, long id) {
         try {
             String[] smsMessages = smsMessagesList.get(pos).split("\n");
             String ClickedItem="",Acc="";
-            String _id,amo,time,sta,temp;
-            int a=0,b=0;
+            String _id,amo,time,sta,temp, cat;
+            int a = 0, b = 0;
             for (int i = 1; i < smsMessages.length; ++i) {
                 ClickedItem += smsMessages[i];
             }
             a=ClickedItem.indexOf(" ");
             b=ClickedItem.indexOf(" ",a+2);
             Acc+=ClickedItem.substring(a+1, b);
-            Toast.makeText(this,"Acc : |"+Acc+"|",Toast.LENGTH_SHORT);
+            Toast.makeText(this,"Acc : |"+Acc+"|",Toast.LENGTH_SHORT).show();
             ArrayList<String> Val = db.Selected3(Acc);
             arrayAdapter.clear();
             for (int i = 0; i < Val.size(); i++) {

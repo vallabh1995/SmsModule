@@ -124,7 +124,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 } while (cursor.moveToNext());
             }
         }
-        if(smsMsgStr1.equalsIgnoreCase("Credited")) {
+        else if(smsMsgStr1.equalsIgnoreCase("Credited")) {
             String cre="";
             float temp;
             if (cursor.moveToFirst()) {
@@ -204,7 +204,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
 
-        String sta,acc,amo,time,Entry1;
+        String sta,acc,amo,time,Entry1,cat;
         int id=0;
         // looping through all rows and adding to list
         if (cursor.moveToFirst()) {
@@ -215,11 +215,13 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 acc="";
                 amo="";
                 time="";
+                cat="";
                 sta+=cursor.getString(1);
                 acc+=cursor.getString(2);
                 amo+=cursor.getString(3);
                 time+=cursor.getString(4);
-                Entry1+="\n "+id+" "+sta+" "+amo+" "+time;
+                cat+=cursor.getString(5);
+                Entry1+="\n "+id+" "+sta+" "+amo+" "+time+" "+cat;
                 DataList.add(Entry1);
             } while (cursor.moveToNext());
         }
