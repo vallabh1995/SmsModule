@@ -40,9 +40,10 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
     String mAmount2 = "", balanceTemp = "";
     public int StartApp=0, balA;
     /*BANK SMS ADDRESSES*/
-    public static int NoBank = 15;
-    //public static String stringArray[] = {"BP-ATMSBI","BZ-ATMSBI","BX-ATMSBI","VK-CorpBK"};
-    public static String stringArray[] = {/*"8451043280", */"VM-HDFCBK", "VM-BOIIND", "BP-SBIMBS", "AM-HDFCBK", "VM-UnionB", "VM-UIICHO", "VM-CBSSBI", "VM-CorpBk", "VL-CENTBK", "VM-CENTBK", "BW-PNBSMS","VK-BOIIND","VM-CBSSBI","VM-BOIIND","BZ-ATMSBI","VK-AxisBk"};
+    public static int NoBank = 3;
+    public static String stringArray[] = {"BP-ATMSBI","BZ-ATMSBI","BX-ATMSBI","VK-CorpBK"};
+    public static String bankNames[]={"State Bank Of India","State Bank Of India","State Bank Of India","Cooporative Bank"};
+   // public static String stringArray[] = {/*"8451043280", */"VM-HDFCBK", "VM-BOIIND", "BP-SBIMBS", "AM-HDFCBK", "VM-UnionB", "VM-UIICHO", "VM-CBSSBI", "VM-CorpBk", "VL-CENTBK", "VM-CENTBK", "BW-PNBSMS","VK-BOIIND","VM-CBSSBI","VM-BOIIND","BZ-ATMSBI","VK-AxisBk"};
     /*ACCOUNT NUMBER*/
     public ArrayList<String> accountNumbers = new ArrayList<String>();
     public int accountI = 0,ft;
@@ -203,6 +204,7 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
             }
             for (i = 0; i <= NoBank; i++) {
                 if (stringArray[i].equalsIgnoreCase(strAddress)) {
+                    ////////
                     //arrayAdapter.add(str);
 
                     //SearchForAccountNumber
@@ -366,7 +368,7 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
             ------------------1---------------------------
             */
 
-            db.add(smsMessageStr, smsAccNo, mAmount2, Time, " Misc.");
+            db.add(smsMessageStr, smsAccNo, mAmount2, Time, "Misc.");
 
             ArrayList<String> Val=db.Select4();
             int j;
@@ -452,7 +454,7 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
         try {
             String[] smsMessages = smsMessagesList.get(pos).split("\n");
             String ClickedItem="",Acc="";
-            String _id,amo,time,sta,temp, cat;
+            String _id,amo,month,year,sta,temp, cat;
             int a = 0, b = 0;
             for (int i = 1; i < smsMessages.length; ++i) {
                 ClickedItem += smsMessages[i];
@@ -466,14 +468,18 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
             for (int i = 0; i < Val.size(); i++) {
                 temp=Val.get(i);
                 a=temp.indexOf(" ");
+                b = temp.indexOf(" ", a + 2);
+                _id = temp.substring(a + 1, b);
+                a = temp.indexOf(" ", b + 2);
+                sta = temp.substring(b + 1, a);
+                b = temp.indexOf(" ", a + 2);
+                amo = temp.substring(a + 1, b);
+                a = temp.indexOf(" ", b + 2);
+                month=temp.substring(b + 1, a);
                 b=temp.indexOf(" ", a + 2);
-                _id=temp.substring(a + 1, b);
-                a=temp.indexOf(" ", b + 2);
-                sta=temp.substring(b + 1, a);
-                b=temp.indexOf(" ", a + 2);
-                amo=temp.substring(a + 1, b);
-                time=temp.substring(b + 1);
-                String Tm="\n|" +_id+ "|\n|" + sta + "|\n|" + amo + "|\n|" + time + "|";
+                year=temp.substring(a + 1, b);
+                cat=temp.substring(b+1);
+                String Tm="\n|" +_id+ "|\n|" + sta + "|\n|" + amo + "|\n|" + month + "|" + year + "|\n|" + cat + "|";
                 arrayAdapter.add(Tm);
             }
 

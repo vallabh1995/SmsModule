@@ -20,7 +20,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public static final String STATUS = "credit_debit";
     public static final String AMOUNT = "amount";
     public static final String KEY_ID = "_id";
-    public static final String TIMESTAMP = "timestamp";
+    public static final String MONTH = "month";
+    public static final String YEAR = "year";
     public static final String CATEGORY = "category";
 
     //Column Name 2
@@ -46,7 +47,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 + STATUS + " TEXT, "
                 + ACCOUNT_NO + " TEXT, "
                 + AMOUNT + " TEXT, "
-                + TIMESTAMP + " TEXT, "
+                + MONTH + " TEXT, "
+                + YEAR + " TEXT, "
                 + CATEGORY + " TEXT)";
         db.execSQL(CREATE_CONTACTS_TABLE);
 
@@ -80,7 +82,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(STATUS, smsMsgStr1.toString());
         values.put(ACCOUNT_NO, smsAccNo1.toString());
         values.put(AMOUNT, mAmount1.toString());
-        values.put(TIMESTAMP, mTimeStamp.toString());
+        values.put(MONTH, mTimeStamp.substring(0,3).toString());
+        values.put(YEAR,mTimeStamp.substring(4,8).toString());
         values.put(CATEGORY,Cat.toString());
 
         // Inserting Row
@@ -204,7 +207,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         Cursor cursor = db.rawQuery(selectQuery, null);
 
-        String sta,acc,amo,time,Entry1,cat;
+        String sta,acc,amo,month,year,Entry1,cat;
         int id=0;
         // looping through all rows and adding to list
         if (cursor.moveToFirst()) {
@@ -214,14 +217,16 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 sta="";
                 acc="";
                 amo="";
-                time="";
+                month="";
+                year="";
                 cat="";
                 sta+=cursor.getString(1);
                 acc+=cursor.getString(2);
                 amo+=cursor.getString(3);
-                time+=cursor.getString(4);
-                cat+=cursor.getString(5);
-                Entry1+="\n "+id+" "+sta+" "+amo+" "+time+" "+cat;
+                month+=cursor.getString(4);
+                year+=cursor.getString(5);
+                cat+=cursor.getString(6);
+                Entry1+="\n "+id+" "+sta+" "+amo+" "+month+" "+year+" "+cat;
                 DataList.add(Entry1);
             } while (cursor.moveToNext());
         }
