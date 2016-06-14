@@ -40,9 +40,9 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
     String mAmount2 = "", balanceTemp = "";
     public int StartApp=0, balA;
     /*BANK SMS ADDRESSES*/
-    public static int NoBank = 3;
-    public static String stringArray[] = {"BP-ATMSBI","BZ-ATMSBI","BX-ATMSBI","VK-CorpBK"};
-    public static String bankNames[]={"State Bank Of India","State Bank Of India","State Bank Of India","Cooporative Bank"};
+    public static int NoBank = 6;
+    public static String stringArray[] = {"BP-ATMSBI","BZ-ATMSBI","BX-ATMSBI","VK-CorpBK","VM-BOIIND","VK-BOIIND","VM-CBSSBI"};
+    public static String bankNames[]={"State Bank Of India","State Bank Of India","State Bank Of India","Cooporative Bank","Bank of India","Bank of India","State Bank of India"};
    // public static String stringArray[] = {/*"8451043280", */"VM-HDFCBK", "VM-BOIIND", "BP-SBIMBS", "AM-HDFCBK", "VM-UnionB", "VM-UIICHO", "VM-CBSSBI", "VM-CorpBk", "VL-CENTBK", "VM-CENTBK", "BW-PNBSMS","VK-BOIIND","VM-CBSSBI","VM-BOIIND","BZ-ATMSBI","VK-AxisBk"};
     /*ACCOUNT NUMBER*/
     public ArrayList<String> accountNumbers = new ArrayList<String>();
@@ -131,7 +131,15 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
                   //  ArrayList<String> Val = db.Selected(accountNumbers.get(j));
                ArrayList<String> Val = db.getAllvalues();
                     for (int i = 0; i < Val.size(); i++) {
-                        arrayAdapter.add(Val.get(i));
+                        String temp=Val.get(i);
+                        int a=temp.indexOf("|");
+                        String index="";
+                        String Data="",BankName="";
+                        index+=temp.substring(a+1);
+                        BankName+=bankNames[Integer.parseInt(index)];
+                        Data+=temp.substring(0,a);
+                        String Disp=BankName+ "\n"+Data;
+                        arrayAdapter.add(Disp);
                    }
                 //}
             }
@@ -162,7 +170,15 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
          //   Val = db.Selected(accountNumbers.get(j));
         Val = db.getAllvalues();
             for (int i = 0; i < Val.size(); i++) {
-                arrayAdapter.add(Val.get(i));
+                String temp=Val.get(i);
+                int a=temp.indexOf("|");
+                String index="";
+                String Data="",BankName="";
+                index+=temp.substring(a+1);
+                BankName+=bankNames[Integer.parseInt(index)];
+                Data+=temp.substring(0,a);
+                String Disp=BankName+ "\n"+Data;
+                arrayAdapter.add(Disp);
             }
        // }
     }
@@ -254,7 +270,7 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
 
                     if (found != 1) {
                         accountNumbers.add(smsAccNo);
-                        db.firstAdd(smsAccNo);
+                        db.firstAdd(smsAccNo,i);
                         accountI++;
                     }
 
@@ -476,6 +492,7 @@ public class SmsActivity extends AppCompatActivity implements OnItemClickListene
                 amo = temp.substring(a + 1, b);
                 a = temp.indexOf(" ", b + 2);
                 month=temp.substring(b + 1, a);
+
                 b=temp.indexOf(" ", a + 2);
                 year=temp.substring(a + 1, b);
                 cat=temp.substring(b+1);

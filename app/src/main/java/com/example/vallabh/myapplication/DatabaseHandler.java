@@ -33,6 +33,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
     public static final String CREDIT = "credit";
     public static final String DEBIT = "debit";
     public static final String TOTAL = "total";
+    public static final String NAME= "name";
 
     public DatabaseHandler(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -62,7 +63,8 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 + ACCOUNT_NO + " TEXT, "
                 + CREDIT + " TEXT, "
                 + DEBIT + " TEXT, "
-                + TOTAL + " TEXT )";
+                + TOTAL + " TEXT, "
+                + NAME + " INTEGER )";
         db.execSQL(CREATE_CONTACTS_TABLE);
     }
 
@@ -91,7 +93,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         db.close(); // Closing database connection
     }
     //Initialize values for bank details in table3
-    void firstAdd(String smsAccNo1) {
+    void firstAdd(String smsAccNo1,Integer id) {
         SQLiteDatabase db = this.getWritableDatabase();
 
         ContentValues values = new ContentValues();
@@ -99,6 +101,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         values.put(CREDIT,"0");
         values.put(DEBIT,"0");
         values.put(TOTAL,"0");
+        values.put(NAME,id);
 
         db.insert(TABLE_NAME3, null, values);
         db.close();
@@ -243,6 +246,7 @@ public class DatabaseHandler extends SQLiteOpenHelper {
         Cursor cursor = db.rawQuery(selectQuery, null);
 
         String id,acc,cre,deb,tot,Entry1;
+        int name;
 
         // looping through all rows and adding to list
         if (cursor.moveToFirst()) {
@@ -258,10 +262,12 @@ public class DatabaseHandler extends SQLiteOpenHelper {
                 cre+=cursor.getString(2);
                 deb+=cursor.getString(3);
                 tot+=cursor.getString(4);
+                name=cursor.getInt(5);
                 Entry1+="\n "+acc+
                         "\n CREDITED : "+cre+
                         "\n DEBITED : "+deb+
-                        "\n TOTAL : "+tot;
+                        "\n TOTAL : "+tot+
+                        "|"+name;
                 DataList.add(Entry1);
             } while (cursor.moveToNext());
         }
